@@ -51,13 +51,90 @@ function renderLevels(levels = []) {
   if (!levels.length) return '';
   return `
     <div class="ladder-grid">
-      ${levels.map((level) => `
-        <article class="panel ladder-step">
-          <span class="ladder-tag">${level.tag}</span>
-          <h3>${level.title}</h3>
-          <p>${level.body}</p>
-        </article>
-      `).join('')}
+      ${levels.map((level) => {
+        const tag = `<span class="ladder-tag">${level.tag}</span>`;
+        const title = `<h3>${level.title}</h3>`;
+        const body = `<p>${level.body}</p>`;
+
+        if (level.demo?.trigger) {
+          return `
+            <article class="panel ladder-step ladder-step-trigger" data-demo-trigger="${level.demo.trigger}" role="button" tabindex="0" aria-label="打开网页端 AI 演示">
+              ${tag}
+              ${title}
+              ${body}
+            </article>
+          `;
+        }
+
+        return `
+          <article class="panel ladder-step">
+            ${tag}
+            ${title}
+            ${body}
+          </article>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function escapeHtml(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function renderCodeBlock(lines = []) {
+  if (!lines.length) return '';
+  return `<pre class="web-demo-code"><code>${escapeHtml(lines.join('\n'))}</code></pre>`;
+}
+
+function findWebDemo(slides) {
+  for (const slide of slides) {
+    if (!slide.levels) continue;
+    for (const level of slide.levels) {
+      if (level.demo?.trigger === 'web-ai') return level.demo;
+    }
+  }
+
+  return null;
+}
+
+function renderWebDemoModal(slides) {
+  const demo = findWebDemo(slides);
+  if (!demo) return '';
+
+  return `
+    <div class="web-demo-modal" data-web-demo-modal aria-hidden="true">
+      <div class="web-demo-backdrop" data-web-demo-close></div>
+      <section class="web-demo-window panel" role="dialog" aria-modal="true" aria-labelledby="web-demo-title">
+        <header class="web-demo-topbar">
+          <div class="web-demo-dots"><span></span><span></span><span></span></div>
+          <strong id="web-demo-title">${demo.title}</strong>
+          <button class="web-demo-close" type="button" aria-label="Close demo" data-web-demo-close>Close</button>
+        </header>
+        <div class="web-demo-thread">
+          <article class="web-demo-message web-demo-message-user is-visible">
+            <span class="web-demo-message-label">User</span>
+            ${renderCodeBlock(demo.code)}
+            <p class="web-demo-question">${demo.prompt}</p>
+          </article>
+          ${demo.responses.map((response, index) => `
+            <article class="web-demo-message web-demo-message-ai" data-web-demo-step="${index}">
+              <span class="web-demo-message-label">${response.label}</span>
+              ${response.text ? `<p>${response.text}</p>` : ''}
+              ${response.code ? renderCodeBlock(response.code) : ''}
+            </article>
+          `).join('')}
+        </div>
+        <footer class="web-demo-composer">
+          <span>继续在网页里追问代码问题...</span>
+          <button type="button" disabled>Send</button>
+        </footer>
+      </section>
     </div>
   `;
 }
@@ -190,6 +267,7 @@ export function renderPresentation(slides) {
       <main class="deck" data-deck>
         ${renderDeck(slides)}
       </main>
+      ${renderWebDemoModal(slides)}
       <div class="scroll-cue">Scroll / PageDown</div>
     </div>
   `;

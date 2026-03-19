@@ -10,8 +10,13 @@ const sections = [...app.querySelectorAll('[data-slide-id]')];
 const buttons = [...app.querySelectorAll('[data-target]')];
 const progressFill = app.querySelector('[data-progress-fill]');
 const scrollCue = app.querySelector('.scroll-cue');
+const demoModal = app.querySelector('[data-web-demo-modal]');
+const demoOpeners = [...app.querySelectorAll('[data-demo-trigger="web-ai"]')];
+const demoClosers = [...app.querySelectorAll('[data-web-demo-close]')];
+const demoSteps = [...app.querySelectorAll('[data-web-demo-step]')];
 
 let activeIndex = 0;
+let demoTimers = [];
 
 function updateActiveState(index) {
   activeIndex = index;
@@ -56,6 +61,44 @@ function playDemo(section) {
   });
 }
 
+function clearWebDemoTimers() {
+  demoTimers.forEach((timer) => window.clearTimeout(timer));
+  demoTimers = [];
+}
+
+function resetWebDemo() {
+  clearWebDemoTimers();
+  demoSteps.forEach((step) => step.classList.remove('is-visible'));
+}
+
+function playWebDemo() {
+  resetWebDemo();
+  demoSteps.forEach((step, index) => {
+    const timer = window.setTimeout(() => {
+      step.classList.add('is-visible');
+    }, 320 * index + 220);
+    demoTimers.push(timer);
+  });
+}
+
+function openWebDemo() {
+  if (!demoModal) return;
+
+  demoModal.classList.add('is-open');
+  demoModal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('has-web-demo-modal');
+  playWebDemo();
+}
+
+function closeWebDemo() {
+  if (!demoModal) return;
+
+  demoModal.classList.remove('is-open');
+  demoModal.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('has-web-demo-modal');
+  resetWebDemo();
+}
+
 buttons.forEach((button) => {
   button.addEventListener('click', () => {
     const index = sections.findIndex((section) => section.id === button.dataset.target);
@@ -63,7 +106,34 @@ buttons.forEach((button) => {
   });
 });
 
+demoOpeners.forEach((opener) => {
+  opener.addEventListener('click', () => {
+    openWebDemo();
+  });
+
+  opener.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      openWebDemo();
+    }
+  });
+});
+
+demoClosers.forEach((closer) => {
+  closer.addEventListener('click', () => {
+    closeWebDemo();
+  });
+});
+
 window.addEventListener('keydown', (event) => {
+  if (demoModal?.classList.contains('is-open')) {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeWebDemo();
+    }
+    return;
+  }
+
   if (['ArrowDown', 'PageDown', ' '].includes(event.key)) {
     event.preventDefault();
     goToIndex(activeIndex + 1);

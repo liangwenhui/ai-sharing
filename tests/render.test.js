@@ -46,3 +46,18 @@ test('summary slide copy uses a distinct class from the summary slide variant', 
   assert.match(html, /<p class="slide-description">先开始，再慢慢收敛。先把顺手的用法跑起来，比追求最复杂的玩法更重要。<\/p>/);
   assert.doesNotMatch(html, /<p class="slide-summary">/);
 });
+
+test('renderDeck marks the ladder web card as an interactive demo trigger', () => {
+  const html = renderDeck(slides);
+
+  assert.match(html, /data-demo-trigger="web-ai"/);
+  assert.match(html, /网页端/);
+});
+
+test('renderPresentation includes the scripted web ai demo modal shell', () => {
+  const html = renderPresentation(slides);
+
+  assert.match(html, /data-web-demo-modal/);
+  assert.match(html, /这段代码怎么优化？/);
+  assert.match(html, /Web AI Demo/);
+});

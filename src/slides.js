@@ -5,13 +5,12 @@ export const slides = [
     variant: 'hero',
     eyebrow: 'TEAM AI SHARING / 2026',
     title: '从网页问答到研发协作',
-    subtitle: '团队 AI 提效入门',
+    subtitle: 'AI 提效入门',
     summary: '今天不展开模型原理，也不追求工具全覆盖，主要结合前端、后端、QA 的日常工作聊聊 AI 协作方式。',
-    chips: ['高频场景', '稳妥工作流', '边界与风险'],
     metrics: [
-      { value: '30 min', label: '主讲时长' },
-      { value: '12', label: '核心 sections' },
-      { value: '1', label: '闭环 demo' }
+      { value: '高频场景', label: '' },
+      { value: '稳妥工作流', label: '' },
+      { value: '边界与风险', label: '' }
     ]
   },
   {
@@ -19,8 +18,8 @@ export const slides = [
     navLabel: '三件事',
     variant: 'grid',
     eyebrow: 'THREE QUESTIONS',
-    title: '今天先聊三件事',
-    summary: '这场分享先聚焦三件最值得聊的事。',
+    title: '三个问题',
+    summary: '我刚开始用AI协作的时候,有三个问题:',
     cards: [
       { title: 'AI 能帮什么', body: '更聚焦研发工作里的具体任务，少谈抽象能力。' },
       { title: '怎样用更稳', body: '把 AI 放进流程里配合，用起来会比让它自由发挥更稳。' },
@@ -32,10 +31,58 @@ export const slides = [
     navLabel: '网页端到协作',
     variant: 'ladder',
     eyebrow: 'MATURITY LADDER',
-    title: 'AI 在研发中的三个层级',
+    title: 'AI 在研发中的三个阶段',
     summary: '可以把它理解成从问答，到辅助，再到协作。能力越强，对可控性的要求也会更高。',
     levels: [
-      { tag: '01', title: '网页端', body: '解释概念、快速问答、整理思路。' },
+      {
+        tag: '01',
+        title: '网页端',
+        body: '解释概念、快速问答、整理思路。',
+        demo: {
+          trigger: 'web-ai',
+          title: 'Web AI Demo',
+          prompt: '这段代码怎么优化？',
+          code: [
+            'function formatActiveUsers(users) {',
+            '  const activeUsers = users.filter((user) => user.active === true);',
+            '  const namedUsers = activeUsers.filter((user) => user.name && user.name.trim() !== "");',
+            '  return namedUsers.map((user) => ({',
+            '    id: user.id,',
+            '    name: user.name.trim(),',
+            '    email: user.email ? user.email.toLowerCase() : ""',
+            '  }));',
+            '}'
+          ],
+          responses: [
+            {
+              label: '问题分析',
+              text: '这段代码做了两次 filter 再 map，数组被重复遍历，而且判空和格式化逻辑比较分散。'
+            },
+            {
+              label: '优化建议',
+              text: '可以把过滤、清洗和结果组装合并成一次遍历，减少中间数组，也更容易补充提前返回。'
+            },
+            {
+              label: '参考改写',
+              code: [
+                'function formatActiveUsers(users) {',
+                '  return users.reduce((result, user) => {',
+                '    if (!user.active || !user.name?.trim()) return result;',
+                '',
+                '    result.push({',
+                '      id: user.id,',
+                '      name: user.name.trim(),',
+                '      email: user.email?.toLowerCase() ?? ""',
+                '    });',
+                '',
+                '    return result;',
+                '  }, []);',
+                '}'
+              ]
+            }
+          ]
+        }
+      },
       { tag: '02', title: 'IDE', body: '局部补全、边看边改、降低微观修改成本。' },
       { tag: '03', title: 'CLI / Agent', body: '读项目、跑命令、看 diff、执行完整闭环。' }
     ]
