@@ -55,13 +55,22 @@ function renderLevels(levels = []) {
         const tag = `<span class="ladder-tag">${level.tag}</span>`;
         const title = `<h3>${level.title}</h3>`;
         const body = `<p>${level.body}</p>`;
+        const hint = level.demo?.label ? `<span class="ladder-demo-link">${level.demo.label}</span>` : '';
 
         if (level.demo?.trigger) {
           return `
-            <article class="panel ladder-step ladder-step-trigger" data-demo-trigger="${level.demo.trigger}" role="button" tabindex="0" aria-label="打开网页端 AI 演示">
+            <article
+              class="panel ladder-step ladder-step-trigger"
+              data-demo-trigger="${level.demo.trigger}"
+              ${level.demo.mode === 'live-terminal' ? `data-live-terminal-open="${level.demo.trigger}"` : ''}
+              role="button"
+              tabindex="0"
+              aria-label="${level.demo.ariaLabel ?? 'Open demo'}"
+            >
               ${tag}
               ${title}
               ${body}
+              ${hint}
             </article>
           `;
         }
@@ -133,6 +142,48 @@ function renderWebDemoModal(slides) {
         <footer class="web-demo-composer">
           <span>继续在网页里追问代码问题...</span>
           <button type="button" disabled>Send</button>
+        </footer>
+      </section>
+    </div>
+  `;
+}
+
+function findLiveTerminalDemo(slides) {
+  for (const slide of slides) {
+    if (!slide.levels) continue;
+    for (const level of slide.levels) {
+      if (level.demo?.mode === 'live-terminal') return level.demo;
+    }
+  }
+
+  return null;
+}
+
+function renderLiveTerminalModal(slides) {
+  const demo = findLiveTerminalDemo(slides);
+  if (!demo) return '';
+
+  return `
+    <div class="live-terminal-modal" data-live-terminal-modal aria-hidden="true">
+      <div class="live-terminal-backdrop" data-live-terminal-close></div>
+      <section class="live-terminal-window panel" role="dialog" aria-modal="true" aria-labelledby="live-terminal-title">
+        <header class="live-terminal-topbar">
+          <div class="live-terminal-dots"><span></span><span></span><span></span></div>
+          <div class="live-terminal-heading">
+            <strong id="live-terminal-title">${demo.title}</strong>
+            <p>${demo.summary}</p>
+          </div>
+          <button class="live-terminal-close" type="button" aria-label="Close live terminal demo" data-live-terminal-close>Close</button>
+        </header>
+        <div class="live-terminal-statusbar">
+          <span class="live-terminal-chip">${demo.badge ?? 'Live Terminal'}</span>
+          <p class="live-terminal-status" data-live-terminal-status>Connecting to your local shell...</p>
+          <button class="live-terminal-retry" type="button" data-live-terminal-retry hidden>Retry</button>
+        </div>
+        <div class="live-terminal-viewport" data-live-terminal-viewport></div>
+        <footer class="live-terminal-footer">
+          <span>Type \`codex\` to begin the live agent demo.</span>
+          <strong>${demo.cwdLabel ?? 'Working directory: repository root'}</strong>
         </footer>
       </section>
     </div>
@@ -268,6 +319,7 @@ export function renderPresentation(slides) {
         ${renderDeck(slides)}
       </main>
       ${renderWebDemoModal(slides)}
+      ${renderLiveTerminalModal(slides)}
       <div class="scroll-cue">Scroll / PageDown</div>
     </div>
   `;

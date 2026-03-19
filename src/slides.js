@@ -83,8 +83,22 @@ export const slides = [
           ]
         }
       },
-      { tag: '02', title: 'IDE', body: '局部补全、边看边改、降低微观修改成本。' },
-      { tag: '03', title: 'CLI / Agent', body: '读项目、跑命令、看 diff、执行完整闭环。' }
+      { tag: '02', title: 'IDE 插件', body: '局部补全、边看边改、降低微观修改成本。' },
+      {
+        tag: '03',
+        title: 'CLI / Agent',
+        body: '读项目、跑命令、看 diff、执行完整闭环。',
+        demo: {
+          trigger: 'codex-live-terminal',
+          mode: 'live-terminal',
+          title: 'Live Codex Demo',
+          summary: '真实 shell 已连接到当前仓库目录，现场可以直接输入命令并启动 Codex。',
+          badge: 'LOCAL SHELL',
+          label: 'Live Codex Demo',
+          ariaLabel: '打开 Codex 实时终端演示',
+          cwdLabel: 'Working directory: current repository'
+        }
+      }
     ]
   },
   {

@@ -54,10 +54,26 @@ test('renderDeck marks the ladder web card as an interactive demo trigger', () =
   assert.match(html, /网页端/);
 });
 
+test('renderDeck marks the cli agent card as an interactive live codex trigger', () => {
+  const html = renderDeck(slides);
+
+  assert.match(html, /data-demo-trigger="codex-live-terminal"/);
+  assert.match(html, /Live Codex Demo/);
+});
+
 test('renderPresentation includes the scripted web ai demo modal shell', () => {
   const html = renderPresentation(slides);
 
   assert.match(html, /data-web-demo-modal/);
   assert.match(html, /这段代码怎么优化？/);
   assert.match(html, /Web AI Demo/);
+});
+
+test('renderPresentation includes the live codex terminal modal shell', () => {
+  const html = renderPresentation(slides);
+
+  assert.match(html, /data-live-terminal-modal/);
+  assert.match(html, /data-live-terminal-open="codex-live-terminal"/);
+  assert.match(html, /data-live-terminal-viewport/);
+  assert.match(html, /Type `codex` to begin the live agent demo\./);
 });

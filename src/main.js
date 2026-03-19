@@ -1,6 +1,8 @@
 import './styles.css';
+import '@xterm/xterm/css/xterm.css';
 import { slides } from './slides.js';
 import { renderPresentation } from './render.js';
+import { createLiveTerminalController } from './live-terminal.js';
 
 const app = document.querySelector('#app');
 app.innerHTML = renderPresentation(slides);
@@ -14,6 +16,14 @@ const demoModal = app.querySelector('[data-web-demo-modal]');
 const demoOpeners = [...app.querySelectorAll('[data-demo-trigger="web-ai"]')];
 const demoClosers = [...app.querySelectorAll('[data-web-demo-close]')];
 const demoSteps = [...app.querySelectorAll('[data-web-demo-step]')];
+const liveTerminalController = createLiveTerminalController({
+  modal: app.querySelector('[data-live-terminal-modal]'),
+  openers: [...app.querySelectorAll('[data-live-terminal-open="codex-live-terminal"]')],
+  closers: [...app.querySelectorAll('[data-live-terminal-close]')],
+  retryButton: app.querySelector('[data-live-terminal-retry]'),
+  statusNode: app.querySelector('[data-live-terminal-status]'),
+  viewport: app.querySelector('[data-live-terminal-viewport]')
+});
 
 let activeIndex = 0;
 let demoTimers = [];
@@ -126,6 +136,14 @@ demoClosers.forEach((closer) => {
 });
 
 window.addEventListener('keydown', (event) => {
+  if (liveTerminalController.isOpen()) {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      liveTerminalController.close();
+    }
+    return;
+  }
+
   if (demoModal?.classList.contains('is-open')) {
     if (event.key === 'Escape') {
       event.preventDefault();

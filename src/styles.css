@@ -303,6 +303,15 @@ a {
   outline-offset: 4px;
 }
 
+.ladder-demo-link {
+  display: inline-flex;
+  margin-top: 18px;
+  color: rgba(240, 248, 255, 0.92);
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 .ladder-tag {
   display: inline-flex;
   margin-bottom: 18px;
@@ -398,7 +407,8 @@ a {
   color: rgba(255, 190, 120, 0.9);
 }
 
-.has-web-demo-modal .scroll-cue {
+.has-web-demo-modal .scroll-cue,
+.has-live-terminal-modal .scroll-cue {
   opacity: 0;
 }
 
@@ -554,6 +564,135 @@ a {
   color: rgba(240, 248, 255, 0.72);
 }
 
+.live-terminal-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  display: grid;
+  place-items: center;
+  padding: 40px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+
+.live-terminal-modal.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.live-terminal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 7, 18, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+.live-terminal-window {
+  position: relative;
+  width: min(1080px, calc(100vw - 96px));
+  display: grid;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.live-terminal-topbar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 18px;
+  align-items: center;
+  padding: 20px 24px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(4, 11, 22, 0.92);
+}
+
+.live-terminal-heading {
+  display: grid;
+  gap: 8px;
+}
+
+.live-terminal-heading strong {
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.live-terminal-heading p,
+.live-terminal-status,
+.live-terminal-footer {
+  margin: 0;
+  color: rgba(214, 235, 255, 0.74);
+}
+
+.live-terminal-dots {
+  display: flex;
+  gap: 10px;
+}
+
+.live-terminal-dots span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.live-terminal-close,
+.live-terminal-retry {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 999px;
+  padding: 9px 14px;
+  color: rgba(240, 248, 255, 0.82);
+  cursor: pointer;
+}
+
+.live-terminal-statusbar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 18px;
+  align-items: center;
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(6, 14, 27, 0.9);
+}
+
+.live-terminal-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(120, 246, 255, 0.26);
+  background: rgba(120, 246, 255, 0.08);
+  color: rgba(240, 248, 255, 0.9);
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.live-terminal-viewport {
+  min-height: 520px;
+  padding: 18px;
+  background:
+    radial-gradient(circle at top left, rgba(31, 126, 255, 0.15), transparent 30%),
+    linear-gradient(180deg, rgba(6, 14, 27, 0.96), rgba(4, 10, 20, 0.98));
+}
+
+.live-terminal-viewport .xterm {
+  height: 100%;
+}
+
+.live-terminal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 24px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(4, 10, 20, 0.92);
+}
+
 .risk-grid {
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
@@ -701,10 +840,12 @@ a {
     grid-template-columns: 1fr;
   }
 
-  .web-demo-modal {
+  .web-demo-modal,
+  .live-terminal-modal {
     padding: 28px;
   }
 
+  .live-terminal-window,
   .web-demo-window {
     width: min(100%, 760px);
   }
@@ -736,28 +877,41 @@ a {
     grid-template-columns: 1fr;
   }
 
-  .web-demo-modal {
+  .web-demo-modal,
+  .live-terminal-modal {
     padding: 18px;
   }
 
-  .web-demo-topbar {
+  .web-demo-topbar,
+  .live-terminal-topbar,
+  .live-terminal-statusbar {
     grid-template-columns: auto 1fr;
   }
 
-  .web-demo-close {
+  .web-demo-close,
+  .live-terminal-close,
+  .live-terminal-retry {
     grid-column: 1 / -1;
     justify-self: end;
   }
 
   .web-demo-thread,
-  .web-demo-composer {
+  .web-demo-composer,
+  .live-terminal-statusbar,
+  .live-terminal-footer {
     padding-left: 18px;
     padding-right: 18px;
   }
 
-  .web-demo-composer {
+  .web-demo-composer,
+  .live-terminal-footer {
     align-items: start;
     flex-direction: column;
+  }
+
+  .live-terminal-viewport {
+    min-height: 420px;
+    padding: 14px;
   }
 
   .deck-progress {

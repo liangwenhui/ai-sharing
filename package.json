@@ -4,10 +4,14 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node server/app.js",
     "build": "vite build",
-    "preview": "vite preview",
+    "preview": "node server/app.js --preview",
     "test": "node --test"
+  },
+  "dependencies": {
+    "@xterm/addon-fit": "^0.10.0",
+    "@xterm/xterm": "^5.5.0"
   },
   "devDependencies": {
     "vite": "^7.1.7"
