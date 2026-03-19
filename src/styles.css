@@ -1,0 +1,578 @@
+:root {
+  color-scheme: dark;
+  --bg: #06111f;
+  --bg-deep: #020712;
+  --panel: rgba(10, 24, 44, 0.56);
+  --panel-strong: rgba(7, 18, 34, 0.8);
+  --line: rgba(140, 202, 255, 0.16);
+  --text: #f5fbff;
+  --muted: rgba(213, 235, 255, 0.7);
+  --accent: #78f6ff;
+  --accent-strong: #2bd4f6;
+  --accent-soft: rgba(120, 246, 255, 0.18);
+  --danger: #ff7a9e;
+  --success: #80ffcc;
+  --shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+  --radius: 28px;
+  --content-width: min(1120px, calc(100vw - 160px));
+  font-family: 'Space Grotesk', 'Avenir Next', 'Helvetica Neue', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at top left, rgba(53, 127, 195, 0.28), transparent 28%),
+    radial-gradient(circle at 82% 24%, rgba(39, 223, 255, 0.2), transparent 22%),
+    linear-gradient(180deg, #071221 0%, #040813 55%, #02050d 100%);
+  color: var(--text);
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Space Grotesk', 'Avenir Next', 'Helvetica Neue', sans-serif;
+}
+
+button,
+a {
+  color: inherit;
+}
+
+.presentation-shell {
+  position: relative;
+  min-height: 100vh;
+}
+
+.ambient,
+.grid-overlay {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+}
+
+.ambient-a {
+  background: radial-gradient(circle at 16% 18%, rgba(48, 153, 255, 0.26), transparent 34%);
+  filter: blur(10px);
+}
+
+.ambient-b {
+  background: radial-gradient(circle at 78% 68%, rgba(42, 232, 255, 0.22), transparent 26%);
+  filter: blur(12px);
+}
+
+.grid-overlay {
+  background-image:
+    linear-gradient(rgba(132, 200, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(132, 200, 255, 0.06) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.22));
+}
+
+.deck {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+.slide {
+  min-height: 100vh;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 72px 64px 96px;
+  opacity: 0.52;
+  transform: scale(0.985);
+  transition: opacity 360ms ease, transform 360ms ease;
+}
+
+.slide.is-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.slide-shell {
+  width: var(--content-width);
+  display: grid;
+  gap: 28px;
+  align-items: start;
+}
+
+.slide-hero .slide-shell {
+  gap: 34px;
+}
+
+.slide-copy {
+  max-width: 760px;
+}
+
+.slide-eyebrow {
+  margin: 0 0 14px;
+  font-size: 0.76rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.slide-title {
+  margin: 0;
+  font-family: 'Sora', 'Space Grotesk', 'Avenir Next', sans-serif;
+  font-size: clamp(2.8rem, 6vw, 5.8rem);
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+  text-wrap: balance;
+}
+
+.slide-kicker {
+  margin: 12px 0 0;
+  font-size: clamp(1.1rem, 2.2vw, 1.45rem);
+  color: rgba(205, 239, 255, 0.88);
+}
+
+.slide-description {
+  margin: 18px 0 0;
+  max-width: 760px;
+  font-size: clamp(1rem, 1.8vw, 1.24rem);
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.panel {
+  position: relative;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(14, 28, 51, 0.7), rgba(5, 12, 24, 0.78));
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
+  overflow: hidden;
+}
+
+.panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(120, 246, 255, 0.12), transparent 45%, rgba(255, 255, 255, 0.03));
+  pointer-events: none;
+}
+
+.chip-row,
+.metric-grid,
+.card-grid,
+.column-grid,
+.ladder-grid,
+.risk-grid,
+.takeaway-stack,
+.resource-row {
+  display: grid;
+  gap: 18px;
+}
+
+.chip-row {
+  margin-top: 26px;
+  grid-template-columns: repeat(3, max-content);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(120, 246, 255, 0.26);
+  background: rgba(120, 246, 255, 0.08);
+  color: rgba(236, 250, 255, 0.92);
+  font-size: 0.92rem;
+}
+
+.metric-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.metric-card,
+.info-card,
+.column-card,
+.ladder-step,
+.risk-card,
+.takeaway-card,
+.resource-card,
+.checklist,
+.demo-steps,
+.terminal {
+  padding: 24px;
+}
+
+.metric-card strong {
+  display: block;
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  letter-spacing: -0.05em;
+}
+
+.metric-card span,
+.info-card p,
+.column-card li,
+.ladder-step p,
+.risk-card p,
+.takeaway-card p,
+.resource-card span,
+.resource-card strong,
+.checklist strong,
+.demo-step strong,
+.terminal-line,
+.scroll-cue {
+  color: var(--muted);
+}
+
+.metric-card span {
+  margin-top: 8px;
+  display: block;
+}
+
+.card-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.info-card h3,
+.column-card h3,
+.ladder-step h3 {
+  margin: 0 0 12px;
+  font-size: 1.16rem;
+}
+
+.column-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.column-card.good {
+  border-color: rgba(128, 255, 204, 0.28);
+}
+
+.column-card.risk {
+  border-color: rgba(255, 122, 158, 0.28);
+}
+
+.column-card ul,
+.checklist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.column-card li {
+  padding: 12px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.column-card li:first-child {
+  border-top: 0;
+}
+
+.ladder-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ladder-step {
+  min-height: 240px;
+}
+
+.ladder-tag {
+  display: inline-flex;
+  margin-bottom: 18px;
+  color: var(--accent);
+  font-size: 0.82rem;
+  letter-spacing: 0.22em;
+}
+
+.checklist {
+  gap: 14px;
+}
+
+.checklist li,
+.demo-step {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.checklist span,
+.demo-step span {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(120, 246, 255, 0.26);
+  color: var(--accent);
+  background: rgba(120, 246, 255, 0.08);
+  font-size: 0.84rem;
+}
+
+.demo-layout {
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 28px;
+  align-items: stretch;
+}
+
+.demo-steps {
+  margin-top: 28px;
+  display: grid;
+  gap: 12px;
+}
+
+.terminal {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 420px;
+}
+
+.terminal-topbar {
+  display: flex;
+  gap: 10px;
+}
+
+.terminal-topbar span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.terminal-body {
+  margin-top: 22px;
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  font-family: 'IBM Plex Mono', 'SFMono-Regular', monospace;
+  font-size: 0.96rem;
+}
+
+.terminal-line {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 260ms ease, transform 260ms ease;
+}
+
+.terminal-line.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.terminal-line.prompt {
+  color: #d6f5ff;
+}
+
+.terminal-line.output {
+  color: rgba(132, 255, 205, 0.9);
+}
+
+.terminal-line.meta {
+  color: rgba(255, 190, 120, 0.9);
+}
+
+.risk-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.risk-card {
+  min-height: 160px;
+  border-color: rgba(255, 122, 158, 0.24);
+}
+
+.takeaway-stack {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.takeaway-card {
+  min-height: 160px;
+}
+
+.resource-row {
+  grid-template-columns: minmax(0, 420px);
+  margin-top: 6px;
+}
+
+.resource-card {
+  display: grid;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.resource-card strong {
+  font-size: 1.1rem;
+  color: var(--text);
+}
+
+.deck-progress {
+  position: fixed;
+  top: 50%;
+  right: 28px;
+  transform: translateY(-50%);
+  z-index: 4;
+  display: grid;
+  grid-template-columns: 3px auto;
+  gap: 16px;
+  align-items: start;
+}
+
+.progress-rail {
+  position: relative;
+  width: 3px;
+  height: 320px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.progress-fill {
+  position: absolute;
+  inset: auto 0 0;
+  height: 100%;
+  transform-origin: bottom;
+  background: linear-gradient(180deg, rgba(120, 246, 255, 0.34), rgba(43, 212, 246, 1));
+}
+
+.progress-markers {
+  display: grid;
+  gap: 10px;
+}
+
+.progress-button {
+  display: grid;
+  grid-template-columns: 14px auto;
+  gap: 12px;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.progress-button .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.08);
+  transition: transform 220ms ease, background 220ms ease, border-color 220ms ease;
+}
+
+.progress-button .label {
+  font-size: 0.82rem;
+  color: rgba(203, 231, 255, 0.46);
+  transition: color 220ms ease, transform 220ms ease;
+}
+
+.progress-button.is-active .dot,
+.progress-button:hover .dot {
+  transform: scale(1.2);
+  background: var(--accent);
+  border-color: transparent;
+}
+
+.progress-button.is-active .label,
+.progress-button:hover .label {
+  color: rgba(238, 249, 255, 0.95);
+  transform: translateX(2px);
+}
+
+.scroll-cue {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  z-index: 4;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  transition: opacity 240ms ease, transform 240ms ease;
+}
+
+.scroll-cue.is-hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(12px);
+}
+
+@media (max-width: 1100px) {
+  .slide {
+    padding: 44px 32px 44px 32px;
+  }
+
+  .slide-shell,
+  .demo-layout {
+    width: min(100%, 980px);
+  }
+
+  .card-grid,
+  .ladder-grid,
+  .risk-grid,
+  .takeaway-stack,
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .demo-layout,
+  .column-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .deck-progress {
+    right: 16px;
+  }
+
+  .progress-button .label {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .slide {
+    padding: 32px 20px 32px 20px;
+  }
+
+  .slide-title {
+    font-size: clamp(2.3rem, 13vw, 3.5rem);
+  }
+
+  .card-grid,
+  .ladder-grid,
+  .risk-grid,
+  .takeaway-stack,
+  .metric-grid,
+  .chip-row {
+    grid-template-columns: 1fr;
+  }
+
+  .deck-progress {
+    top: auto;
+    bottom: 24px;
+    left: 20px;
+    right: 20px;
+    transform: none;
+    grid-template-columns: 1fr;
+  }
+
+  .progress-rail {
+    width: 100%;
+    height: 3px;
+  }
+
+  .progress-fill {
+    inset: 0 auto 0 0;
+    width: 100%;
+    transform-origin: left;
+    transform: scaleX(0.08) !important;
+  }
+
+  .progress-markers {
+    display: none;
+  }
+}
