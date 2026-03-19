@@ -16,6 +16,8 @@ const demoModal = app.querySelector('[data-web-demo-modal]');
 const demoOpeners = [...app.querySelectorAll('[data-demo-trigger="web-ai"]')];
 const demoClosers = [...app.querySelectorAll('[data-web-demo-close]')];
 const demoSteps = [...app.querySelectorAll('[data-web-demo-step]')];
+const backendGuideOpeners = [...app.querySelectorAll('[data-backend-guide-trigger]')];
+const backendGuideClosers = [...app.querySelectorAll('[data-backend-guide-close]')];
 const liveTerminalController = createLiveTerminalController({
   modal: app.querySelector('[data-live-terminal-modal]'),
   openers: [...app.querySelectorAll('[data-live-terminal-open="codex-live-terminal"]')],
@@ -27,6 +29,7 @@ const liveTerminalController = createLiveTerminalController({
 
 let activeIndex = 0;
 let demoTimers = [];
+let activeBackendGuideModal = null;
 
 function updateActiveState(index) {
   activeIndex = index;
@@ -109,6 +112,30 @@ function closeWebDemo() {
   resetWebDemo();
 }
 
+function openBackendGuide(trigger) {
+  const modal = app.querySelector(`[data-backend-guide-modal="${trigger}"]`);
+  if (!modal) return;
+
+  if (activeBackendGuideModal && activeBackendGuideModal !== modal) {
+    activeBackendGuideModal.classList.remove('is-open');
+    activeBackendGuideModal.setAttribute('aria-hidden', 'true');
+  }
+
+  modal.classList.add('is-open');
+  modal.setAttribute('aria-hidden', 'false');
+  activeBackendGuideModal = modal;
+  document.body.classList.add('has-backend-guide-modal');
+}
+
+function closeBackendGuide() {
+  if (!activeBackendGuideModal) return;
+
+  activeBackendGuideModal.classList.remove('is-open');
+  activeBackendGuideModal.setAttribute('aria-hidden', 'true');
+  activeBackendGuideModal = null;
+  document.body.classList.remove('has-backend-guide-modal');
+}
+
 buttons.forEach((button) => {
   button.addEventListener('click', () => {
     const index = sections.findIndex((section) => section.id === button.dataset.target);
@@ -135,11 +162,41 @@ demoClosers.forEach((closer) => {
   });
 });
 
+backendGuideOpeners.forEach((opener) => {
+  const trigger = opener.dataset.backendGuideTrigger;
+  if (!trigger) return;
+
+  opener.addEventListener('click', () => {
+    openBackendGuide(trigger);
+  });
+
+  opener.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      openBackendGuide(trigger);
+    }
+  });
+});
+
+backendGuideClosers.forEach((closer) => {
+  closer.addEventListener('click', () => {
+    closeBackendGuide();
+  });
+});
+
 window.addEventListener('keydown', (event) => {
   if (liveTerminalController.isOpen()) {
     if (event.key === 'Escape') {
       event.preventDefault();
       liveTerminalController.close();
+    }
+    return;
+  }
+
+  if (activeBackendGuideModal?.classList.contains('is-open')) {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeBackendGuide();
     }
     return;
   }

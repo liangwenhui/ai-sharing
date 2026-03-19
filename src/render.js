@@ -22,10 +22,26 @@ function renderCards(cards = []) {
   return `
     <div class="card-grid">
       ${cards.map((card) => `
-        <article class="panel info-card">
-          <h3>${card.title}</h3>
-          <p>${card.body}</p>
-        </article>
+        ${card.guide?.trigger
+    ? `
+            <article
+              class="panel info-card info-card-trigger"
+              data-backend-guide-trigger="${card.guide.trigger}"
+              role="button"
+              tabindex="0"
+              aria-label="查看 ${card.title} 的提问示例"
+            >
+              <h3>${card.title}</h3>
+              <p>${card.body}</p>
+              <span class="info-card-link">点击查看提问方式</span>
+            </article>
+          `
+    : `
+            <article class="panel info-card">
+              <h3>${card.title}</h3>
+              <p>${card.body}</p>
+            </article>
+          `}
       `).join('')}
     </div>
   `;
@@ -51,7 +67,7 @@ function renderLevels(levels = []) {
   if (!levels.length) return '';
   return `
     <div class="ladder-grid">
-      ${levels.map((level) => {
+      ${levels.map((level, index) => {
         const tag = `<span class="ladder-tag">${level.tag}</span>`;
         const title = `<h3>${level.title}</h3>`;
         const body = `<p>${level.body}</p>`;
@@ -61,6 +77,7 @@ function renderLevels(levels = []) {
           return `
             <article
               class="panel ladder-step ladder-step-trigger"
+              data-ladder-level="${index}"
               data-demo-trigger="${level.demo.trigger}"
               ${level.demo.mode === 'live-terminal' ? `data-live-terminal-open="${level.demo.trigger}"` : ''}
               role="button"
@@ -76,7 +93,7 @@ function renderLevels(levels = []) {
         }
 
         return `
-          <article class="panel ladder-step">
+          <article class="panel ladder-step" data-ladder-level="${index}">
             ${tag}
             ${title}
             ${body}
@@ -188,6 +205,104 @@ function renderLiveTerminalModal(slides) {
       </section>
     </div>
   `;
+}
+
+function findBackendGuides(slides) {
+  const guides = [];
+
+  for (const slide of slides) {
+    if (slide.id !== 'backend' || !slide.cards?.length) continue;
+
+    for (const card of slide.cards) {
+      if (!card.guide?.trigger) continue;
+
+      guides.push({
+        trigger: card.guide.trigger,
+        title: card.title,
+        howToAsk: card.guide.howToAsk,
+        example: card.guide.example,
+        theme: card.guide.theme ?? 'default',
+        story: card.guide.story ?? null
+      });
+    }
+  }
+
+  return guides;
+}
+
+function renderBackendGuideStory(story) {
+  if (!story) return '';
+
+  if (story.imageSrc) {
+    return `
+      <section class="backend-guide-story panel">
+        <span class="backend-guide-story-tag">${escapeHtml(story.tag ?? '现身说法')}</span>
+        <figure class="backend-guide-story-image-wrap">
+          <img
+            class="backend-guide-story-image"
+            src="${escapeHtml(story.imageSrc)}"
+            alt="${escapeHtml(story.imageAlt ?? '聊天截图')}"
+            loading="lazy"
+          />
+        </figure>
+      </section>
+    `;
+  }
+
+  if (!story.lines?.length) return '';
+
+  const highlightWord = story.highlightWord ? escapeHtml(story.highlightWord) : '';
+  const lines = story.lines.map((line) => {
+    const safeLine = escapeHtml(line);
+    if (!highlightWord) return `<p>${safeLine}</p>`;
+    return `<p>${safeLine.replace(highlightWord, `<mark>${highlightWord}</mark>`)}</p>`;
+  }).join('');
+
+  return `
+    <section class="backend-guide-story panel">
+      <span class="backend-guide-story-tag">${escapeHtml(story.tag ?? '现身说法')}</span>
+      <article class="backend-guide-chat-shot">
+        <div class="backend-guide-chat-avatar">${escapeHtml(story.avatar ?? 'QA')}</div>
+        <div class="backend-guide-chat-bubble">
+          <p class="backend-guide-chat-meta">
+            <strong>${escapeHtml(story.author ?? '')}</strong>
+            <span>${escapeHtml(story.time ?? '')}</span>
+          </p>
+          ${lines}
+        </div>
+      </article>
+    </section>
+  `;
+}
+
+function renderBackendGuideModals(slides) {
+  const guides = findBackendGuides(slides);
+  if (!guides.length) return '';
+
+  return guides.map((guide) => `
+    <div class="backend-guide-modal" data-backend-guide-modal="${guide.trigger}" aria-hidden="true">
+      <div class="backend-guide-backdrop" data-backend-guide-close></div>
+      <section class="backend-guide-window backend-guide-window-${guide.theme} panel" role="dialog" aria-modal="true" aria-labelledby="backend-guide-title-${guide.trigger}">
+        <header class="backend-guide-topbar">
+          <div class="backend-guide-dots"><span></span><span></span><span></span></div>
+          <strong id="backend-guide-title-${guide.trigger}">${guide.title}</strong>
+          <button class="backend-guide-close" type="button" aria-label="Close backend guide" data-backend-guide-close>Close</button>
+        </header>
+        <div class="backend-guide-content">
+          ${renderBackendGuideStory(guide.story)}
+          <section class="backend-guide-block">
+            <h4>怎么提问</h4>
+            <p>${guide.howToAsk}</p>
+          </section>
+          <section class="backend-guide-block">
+            <h4>提问例子</h4>
+            ${guide.theme === 'codex-cli' ? '<span class="backend-guide-cli-label">Codex CLI Transcript</span>' : ''}
+            <pre class="backend-guide-example${guide.theme === 'codex-cli' ? ' backend-guide-example-codex' : ''}"><code>${escapeHtml(guide.example)}</code></pre>
+          </section>
+        </div>
+      </section>
+    </div>
+  `).join('');
 }
 
 function renderChecklist(checklist = []) {
@@ -319,6 +434,7 @@ export function renderPresentation(slides) {
         ${renderDeck(slides)}
       </main>
       ${renderWebDemoModal(slides)}
+      ${renderBackendGuideModals(slides)}
       ${renderLiveTerminalModal(slides)}
       <div class="scroll-cue">Scroll / PageDown</div>
     </div>

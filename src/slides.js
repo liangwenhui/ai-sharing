@@ -142,9 +142,87 @@ export const slides = [
     title: '后端里，AI 很适合帮你压缩理解成本',
     summary: '尤其是在读陌生模块、梳理调用链、组织复杂改动方案的时候。',
     cards: [
-      { title: '调用链理解', body: '快速定位 handler、service、repository 之间的职责和边界。' },
-      { title: '单测草案', body: '根据逻辑先列应该覆盖的输入、分支和失败路径。' },
-      { title: '排查辅助', body: '结合日志、错误栈、请求链路给出更有结构的排障入口。' }
+      {
+        title: '调用链理解',
+        body: '快速定位 handler、service、repository 之间的职责和边界。',
+        guide: {
+          trigger: 'backend-call-chain',
+          theme: 'codex-cli',
+          story: {
+            tag: '现身说法',
+            imageSrc: '/jaker.png',
+            imageAlt: 'Jaker Lu(QA) 的微信提问截图'
+          },
+          howToAsk: '直接给出服务名 + 接口名 + 你想确认的具体字段，然后要求 AI 输出“定位过程 + 调用链 + 最终结论 + 文件行号”。',
+          example: [
+            '> product core service GetProductV1接口中，flashPrice的缓存时间是多少',
+            '',
+            '• 我会先按技能规则读取 using-superpowers 的 SKILL.md，然后在代码里定位 GetProductV1 和 flashPrice 的缓存配置，确认准确时长后直接给你结论。',
+            '',
+            '• Explored',
+            '  └ Read SKILL.md',
+            '',
+            '────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────',
+            '',
+            '• 我已加载 using-superpowers。下一步我会全局搜索 GetProductV1 和 flashPrice，定位具体缓存逻辑与 TTL 配置。',
+            '',
+            '• Explored',
+            '  └ Search flashPrice|flash_price|FlashPrice in projects',
+            '    Search GetProductV1 in projects',
+            '',
+            '────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────',
+            '',
+            '• 已定位到 product-core-service 的 GetProductV1 实现文件。现在我会只在这个服务内查 flashPrice 的缓存 key/TTL，避免被其他项目干扰。',
+            '',
+            '• Explored',
+            '  └ Search cache|ttl|expire|expiration|redis in service',
+            '    Search flashPrice|flash_price|FlashPrice in product-core-service',
+            '',
+            '────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────',
+            '',
+            '• 已经找到 GetProductV1 -> getPromotionFlashPrice -> GetFlashPricesCache 这条链路。接下来我读取 promotion_client 和常量定义，确认 flashPrice 的过期时间。',
+            '',
+            '• Explored',
+            '  └ Search GetFlashPricesCache|FlashPrice.*Cache|FormatProductFlashPriceCacheKey|flash.*cache in promotionclient',
+            '    Read promotion_client.go',
+            '',
+            '────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────',
+            '',
+            '• 我已在 promotion_client 里看到 FetchBatch2(..., 30*time.Second, ...)。我再快速确认 GetProductV1 走的确实是这条调用链，避免答错接口版本。',
+            '',
+            '• Explored',
+            '  └ Read price_biz.go, combine_service.go, promotion_client.go',
+            '',
+            '────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────',
+            '',
+            '• GetProductV1 这条链路里，flashPrice 的缓存时间是 30 秒。',
+            '',
+            '  关键代码在：',
+            '  /Users/SL_1/workspaces/projects/product-core-service/internal/client/promotionclient/promotion_client.go:237',
+            '',
+            '  调用链确认：',
+            '  /Users/SL_1/workspaces/projects/product-core-service/internal/service/combine_service.go:689 → /Users/SL_1/workspaces/projects/product-core-service/internal/biz/price_biz.go:47 → /Users/SL_1/workspaces/projects/product-core-service/internal/biz/price_biz.go:1249 → FetchBatch2(..., 30*time.Second, ...)。'
+          ].join('\n')
+        }
+      },
+      {
+        title: '单测草案',
+        body: '根据逻辑先列应该覆盖的输入、分支和失败路径。',
+        guide: {
+          trigger: 'backend-test-draft',
+          howToAsk: '先给函数职责和边界条件，再要求 AI 按正常流/异常流/边界流输出测试清单，并标明每个 case 的断言重点。',
+          example: '下面是 createPaymentIntent(service) 的实现。请先输出测试矩阵（正常流、参数缺失、第三方超时、重复请求），再给出 node:test 风格的测试样例骨架，包含 mock 位置与关键断言。'
+        }
+      },
+      {
+        title: '排查辅助',
+        body: '结合日志、错误栈、请求链路给出更有结构的排障入口。',
+        guide: {
+          trigger: 'backend-debug-assist',
+          howToAsk: '把报错现象、最近变更和关键日志一起给 AI，要求它先做“可能原因排序”，再给最小验证步骤，避免直接大改。',
+          example: '线上偶发 502，错误栈指向 inventory reserve 接口，近两天改过 Redis 锁逻辑。请基于附带日志，按“最可能 -> 次可能”列出原因，并给每个原因对应的最小验证命令或排查步骤。'
+        }
+      }
     ]
   },
   {

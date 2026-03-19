@@ -61,12 +61,44 @@ test('renderDeck marks the cli agent card as an interactive live codex trigger',
   assert.match(html, /Live Codex Demo/);
 });
 
+test('renderDeck exposes ladder level indexes for staged animation hooks', () => {
+  const html = renderDeck(slides);
+
+  assert.match(html, /data-ladder-level="0"/);
+  assert.match(html, /data-ladder-level="1"/);
+  assert.match(html, /data-ladder-level="2"/);
+});
+
+test('renderDeck exposes backend scenario cards as interactive guide triggers', () => {
+  const html = renderDeck(slides);
+
+  assert.match(html, /data-backend-guide-trigger="backend-call-chain"/);
+  assert.match(html, /data-backend-guide-trigger="backend-test-draft"/);
+  assert.match(html, /data-backend-guide-trigger="backend-debug-assist"/);
+});
+
 test('renderPresentation includes the scripted web ai demo modal shell', () => {
   const html = renderPresentation(slides);
 
   assert.match(html, /data-web-demo-modal/);
   assert.match(html, /这段代码怎么优化？/);
   assert.match(html, /Web AI Demo/);
+});
+
+test('renderPresentation includes backend scenario guide modals', () => {
+  const html = renderPresentation(slides);
+
+  assert.match(html, /data-backend-guide-modal="backend-call-chain"/);
+  assert.match(html, /backend-guide-window-codex-cli/);
+  assert.match(html, /现身说法/);
+  assert.match(html, /src="\/jaker\.png"/);
+  assert.match(html, /Jaker Lu\(QA\) 的微信提问截图/);
+  assert.match(html, /怎么提问/);
+  assert.match(html, /提问例子/);
+  assert.match(html, /Codex CLI Transcript/);
+  assert.match(html, /Explored/);
+  assert.match(html, /GetProductV1接口中，flashPrice的缓存时间是多少/);
+  assert.match(html, /flashPrice 的缓存时间是 30 秒/);
 });
 
 test('renderPresentation includes the live codex terminal modal shell', () => {
