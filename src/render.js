@@ -444,6 +444,49 @@ function renderResources(resources = []) {
   `;
 }
 
+function renderImage(image) {
+  if (!image?.src) return '';
+  const alt = escapeHtml(image.alt ?? '');
+  const caption = image.caption ? `<figcaption>${escapeHtml(image.caption)}</figcaption>` : '';
+
+  return `
+    <figure class="slide-image panel">
+      <img src="${escapeHtml(image.src)}" alt="${alt}" loading="lazy" />
+      ${caption}
+    </figure>
+  `;
+}
+
+function renderQnaNotebook(notebook) {
+  if (!notebook) return '';
+
+  return `
+    <section class="qna-notebook panel" data-qna-notebook>
+      <header class="qna-notebook-header">
+        <h3>${escapeHtml(notebook.title ?? 'Q&A 记录')}</h3>
+        <p>${escapeHtml(notebook.hint ?? '随手记录现场问题和回答要点。')}</p>
+      </header>
+      <div class="qna-notebook-form">
+        <label>
+          <span>Question</span>
+          <input type="text" placeholder="例如：这个流程怎么落地？" data-qna-question />
+        </label>
+        <label>
+          <span>Answer</span>
+          <textarea rows="3" placeholder="记录回答要点..." data-qna-answer></textarea>
+        </label>
+        <div class="qna-notebook-actions">
+          <button type="button" data-qna-add>添加记录</button>
+          <button type="button" data-qna-clear>清空</button>
+        </div>
+      </div>
+      <ol class="qna-notebook-list" data-qna-list>
+        <li class="qna-notebook-empty">暂无记录</li>
+      </ol>
+    </section>
+  `;
+}
+
 export function renderDemoSection(slide) {
   return `
     <section class="slide slide-demo" id="${slide.id}" data-slide-id="${slide.id}">
@@ -480,7 +523,9 @@ function renderStandardSection(slide) {
     renderChecklist(slide.checklist),
     renderRisks(slide.risks),
     renderTakeaways(slide.takeaways),
-    renderResources(slide.resources)
+    renderResources(slide.resources),
+    renderImage(slide.image),
+    renderQnaNotebook(slide.notebook)
   ].join('');
 
   return `

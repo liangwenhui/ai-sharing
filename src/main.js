@@ -35,11 +35,117 @@ const liveTerminalController = createLiveTerminalController({
 const teamStarterModal = app.querySelector('[data-team-starter-modal]');
 const teamStarterOpeners = [...app.querySelectorAll('[data-backend-guide-trigger="team-starter-readme"]')];
 const teamStarterClosers = [...app.querySelectorAll('[data-team-starter-close]')];
+const qnaNotebook = app.querySelector('[data-qna-notebook]');
+const qnaQuestionInput = app.querySelector('[data-qna-question]');
+const qnaAnswerInput = app.querySelector('[data-qna-answer]');
+const qnaAddButton = app.querySelector('[data-qna-add]');
+const qnaClearButton = app.querySelector('[data-qna-clear]');
+const qnaList = app.querySelector('[data-qna-list]');
 
 let activeIndex = 0;
 let demoTimers = [];
 let activeBackendGuideModal = null;
 let isBackendImageOpen = false;
+const qnaStorageKey = 'team-ai-sharing-deck:qna-notes';
+let qnaNotes = [];
+
+function formatQnaTime(timestamp) {
+  return new Date(timestamp).toLocaleTimeString('zh-CN', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+function saveQnaNotes() {
+  try {
+    window.localStorage.setItem(qnaStorageKey, JSON.stringify(qnaNotes));
+  } catch {
+    // Ignore storage errors (private mode, quota, etc.)
+  }
+}
+
+function loadQnaNotes() {
+  try {
+    const raw = window.localStorage.getItem(qnaStorageKey);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed
+      .filter((item) => item && typeof item === 'object')
+      .map((item) => ({
+        question: String(item.question ?? ''),
+        answer: String(item.answer ?? ''),
+        createdAt: Number(item.createdAt) || Date.now()
+      }));
+  } catch {
+    return [];
+  }
+}
+
+function renderQnaNotes() {
+  if (!qnaList) return;
+
+  if (!qnaNotes.length) {
+    qnaList.innerHTML = '<li class="qna-notebook-empty">暂无记录</li>';
+    return;
+  }
+
+  qnaList.innerHTML = '';
+  qnaNotes.forEach((note, index) => {
+    const item = document.createElement('li');
+    item.className = 'qna-note-item';
+
+    const meta = document.createElement('p');
+    meta.className = 'qna-note-meta';
+    meta.textContent = `${String(index + 1).padStart(2, '0')} · ${formatQnaTime(note.createdAt)}`;
+
+    const question = document.createElement('p');
+    question.className = 'qna-note-question';
+    question.textContent = `Q: ${note.question}`;
+
+    const answer = document.createElement('p');
+    answer.className = 'qna-note-answer';
+    answer.textContent = `A: ${note.answer}`;
+
+    item.append(meta, question, answer);
+    qnaList.append(item);
+  });
+}
+
+function addQnaNote() {
+  if (!qnaQuestionInput || !qnaAnswerInput) return;
+
+  const question = qnaQuestionInput.value.trim();
+  const answer = qnaAnswerInput.value.trim();
+  if (!question && !answer) return;
+
+  qnaNotes.unshift({
+    question: question || '（待补充）',
+    answer: answer || '（待补充）',
+    createdAt: Date.now()
+  });
+
+  saveQnaNotes();
+  renderQnaNotes();
+  qnaQuestionInput.value = '';
+  qnaAnswerInput.value = '';
+  qnaQuestionInput.focus();
+}
+
+function clearQnaNotes() {
+  qnaNotes = [];
+  saveQnaNotes();
+  renderQnaNotes();
+}
+
+function isTypingTarget(target) {
+  if (!(target instanceof HTMLElement)) return false;
+  if (target.isContentEditable) return true;
+
+  const tagName = target.tagName.toLowerCase();
+  return tagName === 'input' || tagName === 'textarea' || tagName === 'select';
+}
 
 function updateActiveState(index) {
   activeIndex = index;
@@ -274,7 +380,36 @@ teamStarterClosers.forEach((closer) => {
   });
 });
 
+if (qnaNotebook) {
+  qnaNotes = loadQnaNotes();
+  renderQnaNotes();
+
+  qnaAddButton?.addEventListener('click', () => {
+    addQnaNote();
+  });
+
+  qnaClearButton?.addEventListener('click', () => {
+    clearQnaNotes();
+  });
+
+  qnaQuestionInput?.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      addQnaNote();
+    }
+  });
+
+  qnaAnswerInput?.addEventListener('keydown', (event) => {
+    if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+      event.preventDefault();
+      addQnaNote();
+    }
+  });
+}
+
 window.addEventListener('keydown', (event) => {
+  if (isTypingTarget(event.target)) return;
+
   if (liveTerminalController.isOpen()) {
     if (event.key === 'Escape') {
       event.preventDefault();

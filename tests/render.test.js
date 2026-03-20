@@ -6,11 +6,14 @@ import { renderDeck, renderDemoSection, renderNavigation, renderPresentation } f
 
 test('renderDeck renders all planned sections', () => {
   const html = renderDeck(slides);
-  const sectionMatches = html.match(/<section /g) ?? [];
+  const sectionMatches = html.match(/data-slide-id=/g) ?? [];
 
-  assert.equal(slides.length, 12);
-  assert.equal(sectionMatches.length, 12);
+  assert.equal(slides.length, 13);
+  assert.equal(sectionMatches.length, 13);
   assert.match(html, /id="hero"/);
+  assert.match(html, /id="qna"/);
+  assert.match(html, /id="qna"[\s\S]*src="\/banana\.jpg"/);
+  assert.match(html, /id="qna"[\s\S]*data-qna-notebook/);
   assert.match(html, /id="summary"/);
 });
 
@@ -27,8 +30,9 @@ test('renderNavigation creates one marker per slide', () => {
   const html = renderNavigation(slides);
   const markerMatches = html.match(/data-target=/g) ?? [];
 
-  assert.equal(markerMatches.length, 12);
+  assert.equal(markerMatches.length, 13);
   assert.match(html, /网页端到协作/);
+  assert.match(html, /Q & A/);
   assert.match(html, /立即开始/);
 });
 

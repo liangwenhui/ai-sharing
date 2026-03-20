@@ -110,6 +110,21 @@ a {
   gap: 34px;
 }
 
+.slide-qna .slide-shell {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 430px);
+  align-items: stretch;
+}
+
+.slide-qna .slide-copy,
+.slide-qna .slide-image {
+  grid-column: 1;
+}
+
+.slide-qna .qna-notebook {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
 .slide-copy {
   max-width: 760px;
 }
@@ -173,6 +188,136 @@ a {
 .resource-row {
   display: grid;
   gap: 18px;
+}
+
+.slide-image {
+  margin: 0;
+  padding: 16px;
+}
+
+.slide-image img {
+  display: block;
+  width: 100%;
+  max-height: min(56vh, 520px);
+  object-fit: contain;
+  border-radius: calc(var(--radius) - 12px);
+}
+
+.slide-image figcaption {
+  margin: 12px 6px 2px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.qna-notebook {
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: min(76vh, 760px);
+}
+
+.qna-notebook-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.qna-notebook-header p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.qna-notebook-form {
+  display: grid;
+  gap: 10px;
+}
+
+.qna-notebook-form label {
+  display: grid;
+  gap: 6px;
+}
+
+.qna-notebook-form span {
+  color: rgba(225, 243, 255, 0.88);
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.qna-notebook-form input,
+.qna-notebook-form textarea {
+  width: 100%;
+  border: 1px solid rgba(140, 202, 255, 0.25);
+  border-radius: 12px;
+  background: rgba(3, 12, 24, 0.58);
+  color: var(--text);
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.qna-notebook-form input:focus-visible,
+.qna-notebook-form textarea:focus-visible {
+  outline: 2px solid rgba(120, 246, 255, 0.34);
+  outline-offset: 2px;
+}
+
+.qna-notebook-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.qna-notebook-actions button {
+  border: 1px solid rgba(120, 246, 255, 0.35);
+  border-radius: 999px;
+  background: rgba(120, 246, 255, 0.12);
+  color: rgba(239, 250, 255, 0.95);
+  padding: 6px 14px;
+  font: inherit;
+  font-size: 0.86rem;
+  cursor: pointer;
+}
+
+.qna-notebook-actions button:hover {
+  background: rgba(120, 246, 255, 0.2);
+}
+
+.qna-notebook-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  overflow: auto;
+}
+
+.qna-notebook-empty {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.qna-note-item {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: rgba(2, 10, 20, 0.56);
+}
+
+.qna-note-meta {
+  margin: 0;
+  color: rgba(196, 226, 247, 0.75);
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+}
+
+.qna-note-question,
+.qna-note-answer {
+  margin: 6px 0 0;
+  color: rgba(235, 247, 255, 0.92);
+  font-size: 0.9rem;
+  line-height: 1.45;
 }
 
 .chip-row {
@@ -1608,6 +1753,21 @@ a {
   .demo-layout,
   .column-grid {
     grid-template-columns: 1fr;
+  }
+
+  .slide-qna .slide-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .slide-qna .slide-copy,
+  .slide-qna .slide-image,
+  .slide-qna .qna-notebook {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .qna-notebook {
+    max-height: none;
   }
 
   .web-demo-modal,

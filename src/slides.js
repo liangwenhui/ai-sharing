@@ -494,5 +494,21 @@ export const slides = [
         href: 'https://shopline.atlassian.net/wiki/spaces/EN/pages/4884037704/Getting+Started+With+Vibe+Coding'
       }
     ]
+  },
+  {
+    id: 'qna',
+    navLabel: 'Q & A',
+    variant: 'quote',
+    eyebrow: 'Q & A',
+    title: 'Q & A',
+    summary: '欢迎提问：可以是今天内容，也可以是你们团队在 AI 协作里的实际问题。',
+    image: {
+      src: '/banana.jpg',
+      alt: 'Q&A banana'
+    },
+    notebook: {
+      title: 'Q & A Notepad',
+      hint: '随时记录参会人员的 Q 和 A，结束后可直接整理成会后纪要。'
+    }
   }
 ];
