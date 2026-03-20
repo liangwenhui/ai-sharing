@@ -219,8 +219,52 @@ export const slides = [
         body: '结合日志、错误栈、请求链路给出更有结构的排障入口。',
         guide: {
           trigger: 'backend-debug-assist',
+          story: {
+            tag: '排查样本',
+            imageSrc: '/temp.png',
+            imageAlt: 'temp.json 排查过程截图'
+          },
           howToAsk: '把报错现象、最近变更和关键日志一起给 AI，要求它先做“可能原因排序”，再给最小验证步骤，避免直接大改。',
-          example: '线上偶发 502，错误栈指向 inventory reserve 接口，近两天改过 Redis 锁逻辑。请基于附带日志，按“最可能 -> 次可能”列出原因，并给每个原因对应的最小验证命令或排查步骤。'
+          example: [
+            '> 根据 temp.json 排查问题',
+            '',
+            '• 我会先基于 temp.json 收集错误线索，复现或定位触发路径，再给出明确的根因和修复建议。先快速读取该文件和相关调用代码。',
+            '',
+            '• Explored',
+            '  └ Read temp.json',
+            '    Search temp\\.json|traceId|http.status_code|exception in project',
+            '',
+            '────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────',
+            '',
+            '• temp.json 当前看起来是独立日志样本，代码里没有直接引用它。我会从日志本身提取错误事件、状态码和调用链，先还原一次请求链路再定位根因。',
+            '',
+            '• Ran jq -r \'.. | objects | select(has("events")) | .events[]? | [.name, (.attributes[]? | select(.key=="exception.message") | .value.stringValue)] | @tsv\' public/temp.json',
+            '  └ exception    ApiProductSearch failed',
+            '',
+            '• Ran jq -r \'.. | objects | select(has("attributes")) | .attributes[]? | select(.key=="http.status_code") | .value.intValue\' public/temp.json | sort | uniq -c',
+            '  └    6 200',
+            '     2 302',
+            '',
+            '• Ran jq -r \'.batches[] | (.resource.attributes // []) as $attrs | ($attrs[]? | select(.key=="service.name") | .value.stringValue) as $svc | (.instrumentationLibrarySpans[]?.spans[]? | [$svc, .name, (.status.code|tostring)] | @tsv)\' public/temp.json',
+            '  └ openresty                                 ^/.../(products|categories|pages|promotions)    0',
+            '    shop.shoplineapp.com (Production)         ProductsController#index                         0',
+            '    product-core-service-prod                  sl_tracerid_mw                                   2',
+            '    api.shoplineapp.com (Production)           V1::LinkRedirectionsController#index             0',
+            '',
+            '────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────',
+            '',
+            '• 已定位核心异常：product-core-service-prod 里 `ApiProductSearch failed`，且同 trace 内 HTTP 只有 200/302，没有 5xx。',
+            '',
+            '• Ran node -e "...timestamp..."',
+            '  └ 2026-03-20T01:20:37.150Z',
+            '',
+            '• 根因判断：请求参数 `sort_by=%27`（单引号）触发搜索失败，系统随后走了 link_redirections 的降级/重定向链路，所以外部表现是 302 而非服务不可用。',
+            '',
+            '• 建议：',
+            '  1) 对 sort_by 做白名单校验（非法值忽略或 400）；',
+            '  2) 参数非法类错误降级日志级别，减少误报警；',
+            '  3) 固定用 traceId 回查业务日志，补齐失败字段与校验规则。'
+          ].join('\n')
         }
       }
     ]

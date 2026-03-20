@@ -234,16 +234,29 @@ function renderBackendGuideStory(story) {
   if (!story) return '';
 
   if (story.imageSrc) {
+    const imageSrc = escapeHtml(story.imageSrc);
+    const imageAlt = escapeHtml(story.imageAlt ?? '聊天截图');
+
     return `
       <section class="backend-guide-story panel">
         <span class="backend-guide-story-tag">${escapeHtml(story.tag ?? '现身说法')}</span>
         <figure class="backend-guide-story-image-wrap">
-          <img
-            class="backend-guide-story-image"
-            src="${escapeHtml(story.imageSrc)}"
-            alt="${escapeHtml(story.imageAlt ?? '聊天截图')}"
-            loading="lazy"
-          />
+          <button
+            class="backend-guide-story-image-trigger"
+            type="button"
+            aria-label="查看图片大图"
+            data-backend-image-trigger
+            data-image-src="${imageSrc}"
+            data-image-alt="${imageAlt}"
+          >
+            <img
+              class="backend-guide-story-image"
+              src="${imageSrc}"
+              alt="${imageAlt}"
+              loading="lazy"
+            />
+            <span class="backend-guide-story-image-hint">点击查看大图</span>
+          </button>
         </figure>
       </section>
     `;
@@ -303,6 +316,24 @@ function renderBackendGuideModals(slides) {
       </section>
     </div>
   `).join('');
+}
+
+function renderBackendImageModal() {
+  return `
+    <div class="backend-image-modal" data-backend-image-modal aria-hidden="true">
+      <div class="backend-image-backdrop" data-backend-image-close></div>
+      <section class="backend-image-window panel" role="dialog" aria-modal="true" aria-labelledby="backend-image-title">
+        <header class="backend-image-topbar">
+          <strong id="backend-image-title">图片预览</strong>
+          <button class="backend-image-close" type="button" aria-label="Close image preview" data-backend-image-close>Close</button>
+        </header>
+        <div class="backend-image-content">
+          <img class="backend-image-view" data-backend-image-view alt="" />
+          <p class="backend-image-caption" data-backend-image-caption></p>
+        </div>
+      </section>
+    </div>
+  `;
 }
 
 function renderChecklist(checklist = []) {
@@ -435,6 +466,7 @@ export function renderPresentation(slides) {
       </main>
       ${renderWebDemoModal(slides)}
       ${renderBackendGuideModals(slides)}
+      ${renderBackendImageModal()}
       ${renderLiveTerminalModal(slides)}
       <div class="scroll-cue">Scroll / PageDown</div>
     </div>

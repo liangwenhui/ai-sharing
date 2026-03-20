@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { slides } from '../src/slides.js';
 import { renderDeck, renderDemoSection, renderNavigation, renderPresentation } from '../src/render.js';
 
@@ -99,6 +100,25 @@ test('renderPresentation includes backend scenario guide modals', () => {
   assert.match(html, /Explored/);
   assert.match(html, /GetProductV1接口中，flashPrice的缓存时间是多少/);
   assert.match(html, /flashPrice 的缓存时间是 30 秒/);
+  assert.match(html, /data-backend-guide-modal="backend-debug-assist"/);
+  assert.match(html, /src="\/temp\.png"/);
+  assert.match(html, /data-backend-image-trigger/);
+  assert.match(html, /点击查看大图/);
+});
+
+test('backend guide example area is scrollable for long transcripts', () => {
+  const css = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8');
+
+  assert.match(css, /\.backend-guide-example\s*\{[^}]*overflow:\s*auto;/);
+});
+
+test('renderPresentation includes backend image preview modal shell', () => {
+  const html = renderPresentation(slides);
+
+  assert.match(html, /data-backend-image-modal/);
+  assert.match(html, /data-backend-image-view/);
+  assert.match(html, /data-backend-image-close/);
+  assert.match(html, /图片预览/);
 });
 
 test('renderPresentation includes the live codex terminal modal shell', () => {

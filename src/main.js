@@ -18,6 +18,11 @@ const demoClosers = [...app.querySelectorAll('[data-web-demo-close]')];
 const demoSteps = [...app.querySelectorAll('[data-web-demo-step]')];
 const backendGuideOpeners = [...app.querySelectorAll('[data-backend-guide-trigger]')];
 const backendGuideClosers = [...app.querySelectorAll('[data-backend-guide-close]')];
+const backendImageModal = app.querySelector('[data-backend-image-modal]');
+const backendImageOpeners = [...app.querySelectorAll('[data-backend-image-trigger]')];
+const backendImageClosers = [...app.querySelectorAll('[data-backend-image-close]')];
+const backendImageView = app.querySelector('[data-backend-image-view]');
+const backendImageCaption = app.querySelector('[data-backend-image-caption]');
 const liveTerminalController = createLiveTerminalController({
   modal: app.querySelector('[data-live-terminal-modal]'),
   openers: [...app.querySelectorAll('[data-live-terminal-open="codex-live-terminal"]')],
@@ -30,6 +35,7 @@ const liveTerminalController = createLiveTerminalController({
 let activeIndex = 0;
 let demoTimers = [];
 let activeBackendGuideModal = null;
+let isBackendImageOpen = false;
 
 function updateActiveState(index) {
   activeIndex = index;
@@ -136,6 +142,39 @@ function closeBackendGuide() {
   document.body.classList.remove('has-backend-guide-modal');
 }
 
+function openBackendImage(src, alt) {
+  if (!backendImageModal || !backendImageView) return;
+
+  const safeSrc = src?.trim();
+  if (!safeSrc) return;
+
+  backendImageView.setAttribute('src', safeSrc);
+  backendImageView.setAttribute('alt', alt ?? '');
+  if (backendImageCaption) {
+    backendImageCaption.textContent = alt ?? '';
+  }
+
+  backendImageModal.classList.add('is-open');
+  backendImageModal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('has-backend-image-modal');
+  isBackendImageOpen = true;
+}
+
+function closeBackendImage() {
+  if (!backendImageModal || !backendImageView || !isBackendImageOpen) return;
+
+  backendImageModal.classList.remove('is-open');
+  backendImageModal.setAttribute('aria-hidden', 'true');
+  backendImageView.setAttribute('src', '');
+  backendImageView.setAttribute('alt', '');
+  if (backendImageCaption) {
+    backendImageCaption.textContent = '';
+  }
+
+  document.body.classList.remove('has-backend-image-modal');
+  isBackendImageOpen = false;
+}
+
 buttons.forEach((button) => {
   button.addEventListener('click', () => {
     const index = sections.findIndex((section) => section.id === button.dataset.target);
@@ -184,11 +223,31 @@ backendGuideClosers.forEach((closer) => {
   });
 });
 
+backendImageOpeners.forEach((opener) => {
+  opener.addEventListener('click', () => {
+    openBackendImage(opener.dataset.imageSrc, opener.dataset.imageAlt ?? '');
+  });
+});
+
+backendImageClosers.forEach((closer) => {
+  closer.addEventListener('click', () => {
+    closeBackendImage();
+  });
+});
+
 window.addEventListener('keydown', (event) => {
   if (liveTerminalController.isOpen()) {
     if (event.key === 'Escape') {
       event.preventDefault();
       liveTerminalController.close();
+    }
+    return;
+  }
+
+  if (isBackendImageOpen) {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeBackendImage();
     }
     return;
   }
