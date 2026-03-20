@@ -139,7 +139,7 @@ export const slides = [
     navLabel: '后端',
     variant: 'grid',
     eyebrow: 'BACKEND',
-    title: '后端里，AI 很适合帮你压缩理解成本',
+    title: '天才程序员上线！',
     summary: '尤其是在读陌生模块、梳理调用链、组织复杂改动方案的时候。',
     cards: [
       {
@@ -224,7 +224,7 @@ export const slides = [
             imageSrc: '/temp.png',
             imageAlt: 'temp.json 排查过程截图'
           },
-          howToAsk: '把报错现象、最近变更和关键日志一起给 AI，要求它先做“可能原因排序”，再给最小验证步骤，避免直接大改。',
+          howToAsk: '把报错现象、最近变更和关键日志一起给 AI，要求它先做“可能原因排序”，再给最小验证步骤. 比如： xx方法出现NPE，排查一下哪一行可能会出现。 xx方法没有返回某字段，有开xxx feature key，排查一下',
           example: [
             '> 根据 temp.json 排查问题',
             '',
@@ -264,6 +264,94 @@ export const slides = [
             '  1) 对 sort_by 做白名单校验（非法值忽略或 400）；',
             '  2) 参数非法类错误降级日志级别，减少误报警；',
             '  3) 固定用 traceId 回查业务日志，补齐失败字段与校验规则。'
+          ].join('\n')
+        }
+      },
+      {
+        title: 'CodeReview',
+        body: '让 AI 先做一轮结构化审查，帮你更快聚焦高风险改动点。',
+        guide: {
+          trigger: 'backend-code-review',
+          theme: 'codex-cli',
+          alwaysScrollExample: true,
+          howToAsk: '把 PR 链接和“根据 PR 描述 CR 一下”的目标直接给 AI，要求它结合描述与 diff 输出按严重级别排序的 findings、开放问题和 merge 建议。',
+          example: [
+            '> https://bitbucket.org/starlinglabs/product-core-service/pull-requests/1939 根据PR描述 CR一下',
+            '',
+            '• 我会按 bitbucket-pr-reviewer 技能流程来做这次 CR：先读取技能说明并拉取 PR product-core-service#1939 的描述和 diff，再基于 PR 描述做逐项风险审查并给出可执行的 review 结论。',
+            '',
+            '• 已拉取完整 patch（共 309 行），重点核对 ConvertSkuPriceTiers 和 handleUpdateProductPriceTier 的行为变化，检查是否引入数据回写丢失、等级集合不完整和 SamePrice 场景回归。',
+            '',
+            '• CR 结论：',
+            '  1. High：default sku 和 DB 都没有 tier 时会直接 return nil, nil，导致“其他 sku 里带了 tier 也不处理”。这与“从所有 SKU 收集会员等级继续处理”的目标冲突。',
+            '     文件参考：product_base_biz.new.go:1040, product_base_biz.new.go:1043',
+            '  2. Medium：创建流程里的会员等级顺序变为非确定性（map + lo.Keys），ConvertSkuPriceTiers 落库顺序可能在不同请求间抖动。',
+            '     文件参考：product_base_biz.new.go:560, product_base_biz.new.go:575, product_base_biz.new.go:702',
+            '  3. Medium：核心逻辑改动缺少可回归单测。新增的是本地 RPC 脚本式测试（硬编码 host/数据、无断言），无法有效兜底。',
+            '     文件参考：product_test.new.go:688, product_test.new.go:707',
+            '',
+            '• 开放问题：',
+            '  1. PR 描述写“MemberPrice == nil 时置 0”，但 create 路径仍保留 nil（不赋值），描述与实现不一致，建议明确 nil 与 0 的语义。',
+            '     文件参考：product_base_biz.new.go:705',
+            '',
+            '• 当前建议：Request changes，先修第 1 条，再补最小单测覆盖后再合入。'
+          ].join('\n')
+        }
+      },
+      {
+        title: '设计实现方案',
+        body: '先把实现方案拆清楚再动手，避免直接写代码导致反复返工。',
+        guide: {
+          trigger: 'backend-design-plan',
+          alwaysScrollExample: true,
+          howToAsk: '给出 Jira 链接和明确目标（分析需求 + 最小改动方案 + 改动步骤），要求先做边界收敛再给可执行清单；如果步骤有歧义，先修订后再落评论。',
+          example: [
+            '> https://shopline.atlassian.net/browse/PDRV-1679 分析需求，设计最小改动实现方案，列出改动步骤',
+            '',
+            '• 我会直接拉取 PDRV-1679 工单详情，先提炼需求和边界，再给你最小改动实现方案与可执行步骤清单。',
+            '• 我正在从工单字段提取与销量排序相关的信息，避免漏掉验收口径。',
+            '• 字段名已确认：核心内容在 Dev Remarks (customfield_14994)。',
+            '',
+            '• 使用 jira-issue-reader 读取后，需求结论如下：',
+            '  1) PLP 商品搜索“销量排序”支持新字段；',
+            '  2) feature key = pdp_product_sold_count 开启时，quantity_sold -> quantity_sold_total；',
+            '  3) key 关闭时保持 quantity_sold；',
+            '  4) quantity_sold_total 由搜索中台计算，product-core-service 仅做排序字段映射。',
+            '',
+            '• 最小改动方案：只改排序映射层，不改接口入参协议、不改返回结构、不改数据写入逻辑。',
+            '',
+            '• 改动步骤：',
+            '  1) 在 search_field.go 新增 quantity_sold_total 常量，保留 quantity_sold；',
+            '  2) 在 search.go 增加销量排序字段选择 helper（按 merchant feature key 判断）；',
+            '  3) 在 AnalyzeSort / AnalyzeSorts 统一应用 helper；',
+            '  4) key on 时将所有来源的 quantity_sold 转为 quantity_sold_total：',
+            '     - sort_by=quantity_sold',
+            '     - sorts=quantity_sold:asc|desc',
+            '     - 分类配置 sortSetting=quantity_sold:asc|desc',
+            '     key off 时全部保持 quantity_sold；',
+            '  5) 增加 on/off 单测，覆盖 sort_by 与 sorts+sortSetting 两条路径；',
+            '  6) 回归执行 product_search_test 和搜索相关测试集；',
+            '  7) 灰度比对 feature on/off 商家下发给搜索中台的 sort 字符串。',
+            '',
+            '> 我认为4需要调整，key on需要将quantity_sold转变',
+            '• 已修订步骤 4，并将修订版作为 Jira 评论发布到 PDRV-1679。'
+          ].join('\n')
+        }
+      },
+      {
+        title: '方案落地',
+        body: '方案确认后，把实施步骤、改动边界和验证路径一次性拉齐。',
+        guide: {
+          trigger: 'backend-rollout',
+          howToAsk: '给 AI 明确“已确认方案”，要求它按落地顺序输出任务拆分、文件改动范围、灰度发布和验证命令，确保可以直接执行。',
+          example: [
+            '> 方案已确认，开始落地。请按可执行清单输出：',
+            '> 1) 实施步骤（按顺序）',
+            '> 2) 每步涉及文件与模块',
+            '> 3) 预期 diff 范围',
+            '> 4) 测试与构建命令',
+            '> 5) 灰度发布检查点与回滚动作',
+            '> 先给计划，等我确认后再开始改代码。'
           ].join('\n')
         }
       }
@@ -317,7 +405,7 @@ export const slides = [
     navLabel: '常见坑',
     variant: 'risk',
     eyebrow: 'RISK SURFACE',
-    title: 'AI 很能帮忙，但这几类问题确实很常见',
+    title: '天才程序员陨落',
     summary: '真正需要留意的，不只是 AI 会犯错，而是我们在顺手之后容易少做验证。',
     risks: [
       '幻觉：回答看起来很完整，实际可能不对',
@@ -332,12 +420,64 @@ export const slides = [
     navLabel: '团队起步',
     variant: 'grid',
     eyebrow: 'TEAM STARTER KIT',
-    title: '团队起步时，先把基本动作跑顺更重要',
+    title: '刚开始，先把基本动作跑顺更重要',
     summary: '先把最小闭环统一起来，通常会比一开始追求 MCP、多 Agent 更实用。',
     cards: [
-      { title: '一个主工具', body: '先让大家共用一种主路径，比每个人各自摸索更容易沉淀经验。' },
+      { title: '一个主工具', body: '先让大家共用一种主路径，比每个人各自摸索更容易沉淀经验。Claude Code / Codex / OpenCode / OpenClaw / IDE插件' },
       { title: '一个工作流', body: '先统一 plan -> diff -> verify，再慢慢加更复杂的自动化。' },
-      { title: '一个说明文件', body: '把怎么运行、怎么验证、哪些地方要注意写进协作说明。' }
+      {
+        title: '一个说明文件',
+        body: '把怎么运行、怎么验证、哪些地方要注意写进协作说明。',
+        guide: {
+          trigger: 'team-starter-readme',
+          title: '项目说明文件',
+          markdown: [
+            '# Project Memory Index',
+            '',
+            '- Source root: `/Users/SL_1/workspaces/projects`',
+            '- Memory root: `/Users/SL_1/.agents/projects`',
+            '- Generated: 2026-03-20',
+            '',
+            '## Repositories',
+            '- `agent-service` - gRPC microservice for response data field verification.',
+            '- `api.shoplineapp.com` - Main API service that supports most Shopline projects.',
+            '- `data-migrate` - Data migration parent project with migrate-core and diff modules.',
+            '- `open-api` - Shopline Open API project.',
+            '- `open-api-node` - Developer-facing Open API backend with Swagger generation.',
+            '- `product-core-service` - Product-domain microservice for business logic.',
+            '- `product-dao` - Product database DDL and generation repo.',
+            '- `product-helper` - Shared helper library for the product domain.',
+            '- `product-import-review-service` - Product import review service.',
+            '- `product-infra` - Shared infrastructure/support repo for the product domain.',
+            '- `product-service-sdk` - SDK for calling product-core-service and agent-service.',
+            '- `promotion-core-service` - Promotion-domain core service.',
+            '- `qa-load-test` - Performance testing repository.',
+            '- `search.shoplineapp.com` - Search service for Shopline projects.',
+            '- `shop.shoplineapp.com` - Storefront rendering application.',
+            '- `shopline-comment` - Bulk product import UI for SHOPLINE Admin.',
+            '- `shopline-web` - Legacy admin panel application.',
+            '- `sl-feature` - Feature-flag SDK and centralized feature dataset.',
+            '- `sl-job-api` - Job API service.',
+            '- `sl-product-review` - Product review service.',
+            '- `sl-skills` - Cross-agent skill repository for Codex, Claude Code, OpenCode, and OpenClaw.',
+            '- `sr_script` - Argo Workflows Cronjob script repository.',
+            '- `superpowers` - Workflow framework for coding agents.',
+            '',
+            '## 链路',
+            'single read',
+            '',
+            'shop -> product-service-sdk -> product-core-service -> promotion-core-service',
+            '',
+            'single write ',
+            '',
+            'admin -> product-service-sdk -> product-core-service',
+            '',
+            'double write ',
+            '',
+            'admin -> api -> product-service-sdk -> product-core-service'
+          ].join('\n')
+        }
+      }
     ]
   },
   {
@@ -345,7 +485,7 @@ export const slides = [
     navLabel: '立即开始',
     variant: 'summary',
     eyebrow: 'TAKEAWAYS',
-    title: '今天希望大家先带走这三句话',
+    title: '马上冻手',
     summary: '先开始，再慢慢收敛。先把顺手的用法跑起来，比追求最复杂的玩法更重要。',
     takeaways: ['先从高频、小任务、可验证的场景开始', '复杂任务先 plan，再让 AI 开始改', 'AI 是协作者，最终验收还是要靠人'],
     resources: [

@@ -76,6 +76,9 @@ test('renderDeck exposes backend scenario cards as interactive guide triggers', 
   assert.match(html, /data-backend-guide-trigger="backend-call-chain"/);
   assert.match(html, /data-backend-guide-trigger="backend-test-draft"/);
   assert.match(html, /data-backend-guide-trigger="backend-debug-assist"/);
+  assert.match(html, /data-backend-guide-trigger="backend-code-review"/);
+  assert.match(html, /data-backend-guide-trigger="backend-design-plan"/);
+  assert.match(html, /data-backend-guide-trigger="backend-rollout"/);
 });
 
 test('renderPresentation includes the scripted web ai demo modal shell', () => {
@@ -90,6 +93,9 @@ test('renderPresentation includes backend scenario guide modals', () => {
   const html = renderPresentation(slides);
 
   assert.match(html, /data-backend-guide-modal="backend-call-chain"/);
+  assert.match(html, /data-backend-guide-modal="backend-code-review"/);
+  assert.match(html, /data-backend-guide-modal="backend-design-plan"/);
+  assert.match(html, /data-backend-guide-modal="backend-rollout"/);
   assert.match(html, /backend-guide-window-codex-cli/);
   assert.match(html, /现身说法/);
   assert.match(html, /src="\/jaker\.png"/);
@@ -100,6 +106,14 @@ test('renderPresentation includes backend scenario guide modals', () => {
   assert.match(html, /Explored/);
   assert.match(html, /GetProductV1接口中，flashPrice的缓存时间是多少/);
   assert.match(html, /flashPrice 的缓存时间是 30 秒/);
+  assert.match(html, /CodeReview/);
+  assert.match(html, /pull-requests\/1939 根据PR描述 CR一下/);
+  assert.match(html, /Request changes，先修第 1 条/);
+  assert.match(html, /data-backend-guide-modal="backend-code-review"[\s\S]*backend-guide-example-scroll/);
+  assert.match(html, /设计实现方案/);
+  assert.match(html, /PDRV-1679 分析需求，设计最小改动实现方案，列出改动步骤/);
+  assert.match(html, /data-backend-guide-modal="backend-design-plan"[\s\S]*backend-guide-example-scroll/);
+  assert.match(html, /方案落地/);
   assert.match(html, /data-backend-guide-modal="backend-debug-assist"/);
   assert.match(html, /src="\/temp\.png"/);
   assert.match(html, /data-backend-image-trigger/);
@@ -110,6 +124,7 @@ test('backend guide example area is scrollable for long transcripts', () => {
   const css = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8');
 
   assert.match(css, /\.backend-guide-example\s*\{[^}]*overflow:\s*auto;/);
+  assert.match(css, /\.backend-guide-example-scroll\s*\{[^}]*overflow-y:\s*scroll;/);
 });
 
 test('renderPresentation includes backend image preview modal shell', () => {
@@ -119,6 +134,15 @@ test('renderPresentation includes backend image preview modal shell', () => {
   assert.match(html, /data-backend-image-view/);
   assert.match(html, /data-backend-image-close/);
   assert.match(html, /图片预览/);
+});
+
+test('renderPresentation includes team starter guide modal with repo memory content', () => {
+  const html = renderPresentation(slides);
+
+  assert.match(html, /data-team-starter-modal="team-starter-readme"/);
+  assert.match(html, /Project Memory Index/);
+  assert.match(html, /product-core-service/);
+  assert.match(html, /double write/);
 });
 
 test('renderPresentation includes the live codex terminal modal shell', () => {

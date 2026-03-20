@@ -222,12 +222,73 @@ function findBackendGuides(slides) {
         howToAsk: card.guide.howToAsk,
         example: card.guide.example,
         theme: card.guide.theme ?? 'default',
-        story: card.guide.story ?? null
+        story: card.guide.story ?? null,
+        alwaysScrollExample: card.guide.alwaysScrollExample ?? false
       });
     }
   }
 
   return guides;
+}
+
+function findTeamStarterGuide(slides) {
+  for (const slide of slides) {
+    if (slide.id !== 'team' || !slide.cards?.length) continue;
+
+    for (const card of slide.cards) {
+      if (!card.guide?.trigger) continue;
+
+      return {
+        trigger: card.guide.trigger,
+        title: card.guide.title,
+        content: card.guide.content,
+        markdown: card.guide.markdown
+      };
+    }
+  }
+
+  return null;
+}
+
+function renderTeamStarterGuideContent(guide) {
+  if (guide?.markdown) {
+    return `
+      <pre class="team-starter-markdown"><code>${escapeHtml(guide.markdown)}</code></pre>
+    `;
+  }
+
+  const content = guide?.content;
+  if (!content?.length) return '';
+
+  return content.map(section => `
+    <section class="team-starter-section">
+      <h4>${section.title}</h4>
+      <ul>
+        ${section.items.map(item => `<li>${item}</li>`).join('')}
+      </ul>
+    </section>
+  `).join('');
+}
+
+function renderTeamStarterModal(slides) {
+  const guide = findTeamStarterGuide(slides);
+  if (!guide) return '';
+
+  return `
+    <div class="team-starter-modal" data-team-starter-modal="team-starter-readme" aria-hidden="true">
+      <div class="team-starter-backdrop" data-team-starter-close></div>
+      <section class="team-starter-window panel" role="dialog" aria-modal="true" aria-labelledby="team-starter-title">
+        <header class="team-starter-topbar">
+          <div class="team-starter-dots"><span></span><span></span><span></span></div>
+          <strong id="team-starter-title">${guide.title}</strong>
+          <button class="team-starter-close" type="button" aria-label="Close team starter guide" data-team-starter-close>Close</button>
+        </header>
+        <div class="team-starter-content">
+          ${renderTeamStarterGuideContent(guide)}
+        </div>
+      </section>
+    </div>
+  `;
 }
 
 function renderBackendGuideStory(story) {
@@ -292,7 +353,12 @@ function renderBackendGuideModals(slides) {
   const guides = findBackendGuides(slides);
   if (!guides.length) return '';
 
-  return guides.map((guide) => `
+  return guides.map((guide) => {
+    const exampleClasses = ['backend-guide-example'];
+    if (guide.theme === 'codex-cli') exampleClasses.push('backend-guide-example-codex');
+    if (guide.alwaysScrollExample) exampleClasses.push('backend-guide-example-scroll');
+
+    return `
     <div class="backend-guide-modal" data-backend-guide-modal="${guide.trigger}" aria-hidden="true">
       <div class="backend-guide-backdrop" data-backend-guide-close></div>
       <section class="backend-guide-window backend-guide-window-${guide.theme} panel" role="dialog" aria-modal="true" aria-labelledby="backend-guide-title-${guide.trigger}">
@@ -310,12 +376,13 @@ function renderBackendGuideModals(slides) {
           <section class="backend-guide-block">
             <h4>提问例子</h4>
             ${guide.theme === 'codex-cli' ? '<span class="backend-guide-cli-label">Codex CLI Transcript</span>' : ''}
-            <pre class="backend-guide-example${guide.theme === 'codex-cli' ? ' backend-guide-example-codex' : ''}"><code>${escapeHtml(guide.example)}</code></pre>
+            <pre class="${exampleClasses.join(' ')}"><code>${escapeHtml(guide.example)}</code></pre>
           </section>
         </div>
       </section>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 function renderBackendImageModal() {
@@ -468,6 +535,7 @@ export function renderPresentation(slides) {
       ${renderBackendGuideModals(slides)}
       ${renderBackendImageModal()}
       ${renderLiveTerminalModal(slides)}
+      ${renderTeamStarterModal(slides)}
       <div class="scroll-cue">Scroll / PageDown</div>
     </div>
   `;

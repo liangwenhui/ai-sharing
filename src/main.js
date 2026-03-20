@@ -32,6 +32,10 @@ const liveTerminalController = createLiveTerminalController({
   viewport: app.querySelector('[data-live-terminal-viewport]')
 });
 
+const teamStarterModal = app.querySelector('[data-team-starter-modal]');
+const teamStarterOpeners = [...app.querySelectorAll('[data-backend-guide-trigger="team-starter-readme"]')];
+const teamStarterClosers = [...app.querySelectorAll('[data-team-starter-close]')];
+
 let activeIndex = 0;
 let demoTimers = [];
 let activeBackendGuideModal = null;
@@ -175,6 +179,22 @@ function closeBackendImage() {
   isBackendImageOpen = false;
 }
 
+function openTeamStarter() {
+  if (!teamStarterModal) return;
+
+  teamStarterModal.classList.add('is-open');
+  teamStarterModal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('has-team-starter-modal');
+}
+
+function closeTeamStarter() {
+  if (!teamStarterModal) return;
+
+  teamStarterModal.classList.remove('is-open');
+  teamStarterModal.setAttribute('aria-hidden', 'false');
+  document.body.classList.remove('has-team-starter-modal');
+}
+
 buttons.forEach((button) => {
   button.addEventListener('click', () => {
     const index = sections.findIndex((section) => section.id === button.dataset.target);
@@ -235,6 +255,25 @@ backendImageClosers.forEach((closer) => {
   });
 });
 
+teamStarterOpeners.forEach((opener) => {
+  opener.addEventListener('click', () => {
+    openTeamStarter();
+  });
+
+  opener.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      openTeamStarter();
+    }
+  });
+});
+
+teamStarterClosers.forEach((closer) => {
+  closer.addEventListener('click', () => {
+    closeTeamStarter();
+  });
+});
+
 window.addEventListener('keydown', (event) => {
   if (liveTerminalController.isOpen()) {
     if (event.key === 'Escape') {
@@ -256,6 +295,14 @@ window.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
       event.preventDefault();
       closeBackendGuide();
+    }
+    return;
+  }
+
+  if (teamStarterModal?.classList.contains('is-open')) {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeTeamStarter();
     }
     return;
   }
