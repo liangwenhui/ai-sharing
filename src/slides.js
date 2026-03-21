@@ -371,33 +371,25 @@ export const slides = [
     ]
   },
   {
-    id: 'prompting',
-    navLabel: '提需求',
-    variant: 'quote',
-    eyebrow: 'PROMPT SHAPE',
-    title: '提问方式，决定输出质量',
-    summary: '这四句不算复杂 prompt，更像一个顺手的最小闭环。',
-    checklist: [
-      '先分析需求，只输出方案，不要开始实施',
-      '确认后再开始修改',
-      '修改后给我看 diff',
-      '最后跑测试 / 构建 / lint'
-    ]
-  },
-  {
-    id: 'demo',
-    navLabel: '闭环 demo',
-    variant: 'demo',
-    eyebrow: 'WORKFLOW DEMO',
-    title: '一个更稳的协作闭环',
-    summary: '先分析，再执行，再看 diff，最后验证。复杂任务先把方案聊清楚，再让 AI 动手会更稳。',
-    steps: ['先分析方案', '确认后开始修改', '看 diff', '测试/构建/lint'],
-    terminal: [
-      { tone: 'prompt', text: '> 先分析需求，只输出方案，不要开始实施。' },
-      { tone: 'output', text: 'Plan: 识别改动文件、风险点、验证路径。' },
-      { tone: 'prompt', text: '> 方案可以，开始修改，修改后给我看 diff。' },
-      { tone: 'output', text: 'Diff ready: 2 files changed, 1 test added, 0 unrelated edits.' },
-      { tone: 'meta', text: 'Verify: npm test && npm run build' }
+    id: 'agent-collab',
+    navLabel: 'Agent协作',
+    variant: 'grid',
+    eyebrow: 'AGENT COLLABORATION',
+    title: '和 Agent 高效协作：三个动作',
+    summary: 'AI是放大器，不是代替者',
+    cards: [
+      {
+        title: '残差连接',
+        body: '先让 Agent 给出当前最优方案，再明确指出“距离理想结果还差什么”。每轮只补一个残差，比整段推倒重来更快。'
+      },
+      {
+        title: '结构化输入',
+        body: '把问题拆成：目标、上下文、约束、输出格式、验收标准。输入越像任务合同，输出越稳定。'
+      },
+      {
+        title: '迭代循环',
+        body: '推荐固定 4 步：Analyze -> Plan -> Execute -> Verify。先对齐方案，再执行和回归，能显著降低跑偏与假完成。'
+      }
     ]
   },
   {

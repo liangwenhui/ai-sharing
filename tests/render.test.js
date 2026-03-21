@@ -2,14 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { slides } from '../src/slides.js';
-import { renderDeck, renderDemoSection, renderNavigation, renderPresentation } from '../src/render.js';
+import { renderDeck, renderNavigation, renderPresentation } from '../src/render.js';
 
 test('renderDeck renders all planned sections', () => {
   const html = renderDeck(slides);
   const sectionMatches = html.match(/data-slide-id=/g) ?? [];
 
-  assert.equal(slides.length, 13);
-  assert.equal(sectionMatches.length, 13);
+  assert.equal(sectionMatches.length, slides.length);
   assert.match(html, /id="hero"/);
   assert.match(html, /id="qna"/);
   assert.match(html, /id="qna"[\s\S]*src="\/banana\.jpg"/);
@@ -17,20 +16,11 @@ test('renderDeck renders all planned sections', () => {
   assert.match(html, /id="summary"/);
 });
 
-test('renderDemoSection outputs all workflow steps', () => {
-  const demoSlide = slides.find((slide) => slide.variant === 'demo');
-  const html = renderDemoSection(demoSlide);
-
-  assert.match(html, /先分析方案/);
-  assert.match(html, /看 diff/);
-  assert.match(html, /测试\/构建\/lint/);
-});
-
 test('renderNavigation creates one marker per slide', () => {
   const html = renderNavigation(slides);
   const markerMatches = html.match(/data-target=/g) ?? [];
 
-  assert.equal(markerMatches.length, 13);
+  assert.equal(markerMatches.length, slides.length);
   assert.match(html, /网页端到协作/);
   assert.match(html, /Q & A/);
   assert.match(html, /立即开始/);
