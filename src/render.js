@@ -1,3 +1,14 @@
+function resolvePublicAssetPath(path) {
+  if (!path) return '';
+  if (/^(?:[a-z]+:)?\/\//i.test(path) || path.startsWith('data:')) return path;
+
+  const normalizedPath = path.startsWith('/') ? path.slice(1) : path;
+  const baseUrl = import.meta.env?.BASE_URL ?? './';
+  const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+
+  return `${normalizedBaseUrl}${normalizedPath}`;
+}
+
 function renderTags(chips = []) {
   if (!chips.length) return '';
   return `<div class="chip-row">${chips.map((chip) => `<span class="chip">${chip}</span>`).join('')}</div>`;
@@ -296,7 +307,7 @@ function renderBackendGuideStory(story) {
   if (!story) return '';
 
   if (story.imageSrc) {
-    const imageSrc = escapeHtml(story.imageSrc);
+    const imageSrc = escapeHtml(resolvePublicAssetPath(story.imageSrc));
     const imageAlt = escapeHtml(story.imageAlt ?? '聊天截图');
 
     return `
@@ -535,12 +546,13 @@ function renderResources(resources = []) {
 
 function renderImage(image) {
   if (!image?.src) return '';
+  const imageSrc = escapeHtml(resolvePublicAssetPath(image.src));
   const alt = escapeHtml(image.alt ?? '');
   const caption = image.caption ? `<figcaption>${escapeHtml(image.caption)}</figcaption>` : '';
 
   return `
     <figure class="slide-image panel">
-      <img src="${escapeHtml(image.src)}" alt="${alt}" loading="lazy" />
+      <img src="${imageSrc}" alt="${alt}" loading="lazy" />
       ${caption}
     </figure>
   `;

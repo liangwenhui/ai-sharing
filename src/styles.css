@@ -940,6 +940,10 @@ a {
 
 .backend-guide-story-image-wrap {
   margin: 0;
+  display: grid;
+  place-items: center;
+  min-height: 220px;
+  padding: 16px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(9, 16, 29, 0.92);
@@ -949,7 +953,9 @@ a {
 .backend-guide-story-image {
   display: block;
   width: 100%;
-  height: auto;
+  height: min(34vh, 320px);
+  object-fit: contain;
+  object-position: center;
 }
 
 .backend-guide-chat-shot {
@@ -1459,6 +1465,7 @@ a {
 .backend-guide-story-image-trigger {
   width: 100%;
   display: grid;
+  justify-items: center;
   gap: 10px;
   border: 0;
   margin: 0;

@@ -11,7 +11,7 @@ test('renderDeck renders all planned sections', () => {
   assert.equal(sectionMatches.length, slides.length);
   assert.match(html, /id="hero"/);
   assert.match(html, /id="qna"/);
-  assert.match(html, /id="qna"[\s\S]*src="\/banana\.jpg"/);
+  assert.match(html, /id="qna"[\s\S]*src="\.\/banana\.jpg"/);
   assert.match(html, /id="qna"[\s\S]*data-qna-notebook/);
   assert.match(html, /id="summary"/);
 });
@@ -133,7 +133,8 @@ test('renderPresentation includes backend scenario guide modals', () => {
   assert.match(html, /data-backend-guide-modal="backend-rollout"/);
   assert.match(html, /backend-guide-window-codex-cli/);
   assert.match(html, /现身说法/);
-  assert.match(html, /src="\/jaker\.png"/);
+  assert.match(html, /src="\.\/jaker\.png"/);
+  assert.match(html, /data-image-src="\.\/jaker\.png"/);
   assert.match(html, /Jaker Lu\(QA\) 的微信提问截图/);
   assert.match(html, /怎么提问/);
   assert.match(html, /提问例子/);
@@ -151,7 +152,8 @@ test('renderPresentation includes backend scenario guide modals', () => {
   assert.match(html, /data-backend-guide-modal="backend-design-plan"[\s\S]*backend-guide-example-scroll/);
   assert.match(html, /方案落地/);
   assert.match(html, /data-backend-guide-modal="backend-debug-assist"/);
-  assert.match(html, /src="\/temp\.png"/);
+  assert.match(html, /src="\.\/temp\.png"/);
+  assert.match(html, /data-image-src="\.\/temp\.png"/);
   assert.match(html, /data-backend-image-trigger/);
   assert.match(html, /点击查看大图/);
 });
@@ -264,6 +266,14 @@ test('backend guide prompt area styles are present for scrollable prompt blocks'
 
   assert.match(css, /\.backend-guide-prompts\s*\{[^}]*overflow-y:\s*scroll;/);
   assert.match(css, /\.backend-guide-prompt\s*\{/);
+});
+
+test('backend guide story images use a contained preview frame', () => {
+  const css = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8');
+
+  assert.match(css, /\.backend-guide-story-image-wrap\s*\{[^}]*min-height:\s*220px;/);
+  assert.match(css, /\.backend-guide-story-image\s*\{[^}]*height:\s*min\(34vh,\s*320px\);/);
+  assert.match(css, /\.backend-guide-story-image\s*\{[^}]*object-fit:\s*contain;/);
 });
 
 test('renderPresentation includes backend image preview modal shell', () => {

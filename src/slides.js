@@ -310,7 +310,7 @@ export const slides = [
     navLabel: '场景分享',
     variant: 'grid',
     eyebrow: 'SCENARIO SHARING',
-    title: '场景分享：前端、后端、QA 怎么开始用',
+    title: '场景分享',
     summary: '共同点不是“AI 替你做完”，而是更快形成第一版判断、方案和清单。',
     cards: [
       {
