@@ -8,9 +8,9 @@ export const slides = [
     subtitle: 'AI 提效入门',
     summary: '今天不展开模型原理，也不追求工具全覆盖，主要结合前端、后端、QA 的日常工作聊聊 AI 协作方式。',
     metrics: [
-      { value: '高频场景', label: '' },
-      { value: '稳妥工作流', label: '' },
-      { value: '边界与风险', label: '' }
+      { value: '能帮什么', label: '高频场景' },
+      { value: '怎样更稳', label: '工作流' },
+      { value: '边界在哪', label: '风险与验收' }
     ]
   },
   {
@@ -19,7 +19,7 @@ export const slides = [
     variant: 'grid',
     eyebrow: 'THREE QUESTIONS',
     title: '三个问题',
-    summary: '我刚开始用AI协作的时候,有三个问题:',
+    summary: '我刚开始用 AI 协作的时候，有三个问题：',
     cards: [
       { title: 'AI 能帮什么', body: '更聚焦研发工作里的具体任务，少谈抽象能力。' },
       { title: '怎样用更稳', body: '把 AI 放进流程里配合，用起来会比让它自由发挥更稳。' },
@@ -122,25 +122,196 @@ export const slides = [
     ]
   },
   {
-    id: 'frontend',
-    navLabel: '前端',
+    id: 'agent-collab',
+    navLabel: '协作方式',
     variant: 'grid',
-    eyebrow: 'FRONTEND',
-    title: '前端和 AI 配合，通常先在执行层见效',
-    summary: '更常见的价值是：更快给出初稿、解释陌生代码、拆分改动路径。',
+    eyebrow: 'AGENT COLLABORATION',
+    title: '和 Agent 高效协作：三个动作',
+    summary: '把任务说清楚，按 plan -> diff -> verify 跑闭环，再围绕主线逐轮补差。',
     cards: [
-      { title: '组件初稿', body: '根据需求描述给出页面结构、状态拆分、组件边界。' },
-      { title: '代码阅读', body: '快速解释状态流转、样式冲突、接口字段语义。' },
-      { title: '重构拆分', body: '先把大改拆成几步，再做 reviewable diff。' }
+      {
+        title: '保留主线，逐轮补差',
+        body: '先让 Agent 给出当前最优版本，再明确指出“距离理想结果还差什么”。每轮只补一个残差，比整段推倒重来更快。',
+        guide: {
+          trigger: 'agent-residual-connection',
+          ariaLabel: '查看 保留主线，逐轮补差 的图解说明',
+          linkLabel: '点击查看图解',
+          modalTitle: '保留主线，逐轮补差：从残差连接到 Agent 协作',
+          sections: [
+            {
+              title: '深度学习中的残差连接',
+              body: '每个残差块会保留当前输入，并让堆叠层学习一个修正量 F(x)，所以块输出常写成 y = x + F(x)。连续堆叠时，下一块会在上一块输出基础上继续补修正，而不是从零重写全部表示。',
+              diagram: {
+                type: 'residual-connection',
+                blocks: [
+                  {
+                    title: '残差块 1',
+                    inputLabel: '输入 x',
+                    shortcutLabel: '保留路径 x',
+                    residualLabel: '残差分支 F1(x)',
+                    outputLabel: '输出 y = x + F1(x)'
+                  },
+                  {
+                    title: '残差块 2',
+                    inputLabel: '输入 y',
+                    shortcutLabel: '保留路径 y',
+                    residualLabel: '残差分支 F2(y)',
+                    outputLabel: '输出 y2 = y + F2(y)'
+                  }
+                ],
+                note: '没有残差连接时，网络更依赖层层重写表示，原始信息更难保留，深层训练时梯度也更容易变弱。'
+              }
+            },
+            {
+              title: 'Agent 协作中的类比操作',
+              body: '和 Agent 协作时，也不要每轮都推倒重来。更稳的做法是先保留已经确认正确的主线，再只指出这轮还差什么。',
+              items: [
+                '先明确哪些结论、约束、方向已经对了，不要让模型全部重算。',
+                '把本轮要补的差值说清楚：少了什么、错了什么、下一步要补什么。',
+                '如果上下文已经变脏，就先由人提炼主线，再用新的任务描述重新启动推理。',
+                '目标不是让 Agent 每轮都更会猜，而是让它围绕主线持续收敛。'
+              ]
+            },
+            {
+              title: '推荐提问方式',
+              body: '把需求拆成“分析方案 -> 落实现步骤 -> 回到代码复核 -> 分批执行”四段，会比一口气让 Agent 全做完更稳。',
+              prompts: [
+                {
+                  label: '1. 需求分析与最小方案',
+                  text: '这是我的需求：xxxx，涉及 shop API。请你分析需求，基于现有代码，设计出最小改动的实现方案。'
+                },
+                {
+                  label: '2. 从方案到实现步骤',
+                  text: '这是需求 xxxx，方案是 A。请你列出具体的实现步骤 B，以及对应的代码位置。'
+                },
+                {
+                  label: '3. 回到代码确认可行性',
+                  text: '这是需求 xxxx，实现步骤 B。请你基于当前代码，确认这些实现步骤是否可行，并指出风险点。'
+                },
+                {
+                  label: '4. 分批执行步骤',
+                  text: '请按步骤 B 分批执行。每完成一批，都说明改了哪些文件、为什么这样改、还剩哪些步骤。'
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        title: '结构化输入',
+        body: '把问题拆成：目标、上下文、约束、输出格式、验收标准。输入越像任务合同，输出越稳定。',
+        guide: {
+          trigger: 'agent-structured-input',
+          ariaLabel: '查看 结构化输入 的详细说明',
+          linkLabel: '点击查看详解',
+          modalTitle: '结构化输入：把任务说成可执行合同',
+          sections: [
+            {
+              title: '什么叫结构化输入',
+              body: '不是把问题说得更长，而是把任务拆成清晰字段，让 Agent 明白目标、上下文、约束、输出格式和验收标准。这样它不是在猜你的意图，而是在执行一份更明确的任务合同。'
+            },
+            {
+              title: '为什么这样更稳',
+              items: [
+                '少猜：先说清目标和上下文，模型不容易自己脑补需求。',
+                '少偏：先写约束，能减少“改着改着跑远了”。',
+                '好检查：提前定义输出格式和验收标准，结果更容易 review。',
+                '好复用：同一个模板可以套到很多研发任务里。'
+              ]
+            },
+            {
+              title: '模糊提问 vs 结构化提问',
+              body: '同样是让 Agent 帮忙，输入结构不同，输出稳定性会差很多。',
+              prompts: [
+                {
+                  label: '模糊提问',
+                  text: '帮我改一下 shop 接口。'
+                },
+                {
+                  label: '结构化提问',
+                  text: '这是我的任务：为 shop 订单查询接口增加按 userId 过滤能力。\n\n目标：\n在现有接口上支持按 userId 查询订单。\n\n上下文：\n项目已经有 order service，接口通过 shop API 暴露。\n请基于当前代码分析，不要脱离现有实现猜新架构。\n\n约束：\n最小改动；\n不要改数据库结构；\n保持旧接口兼容；\n如果有风险点，请明确指出。\n\n输出格式：\n1. 先分析需求\n2. 给出最小改动实现方案\n3. 列出涉及的代码位置\n4. 标出风险点和待确认项\n\n验收标准：\n接口支持按 userId 过滤；\n旧调用方式不受影响；\n改动范围清晰，可分步实施。'
+                }
+              ]
+            },
+            {
+              title: '推荐提问模板',
+              body: '这份模板可以直接套到需求分析、代码修改、测试设计和 review 任务里。',
+              prompts: [
+                {
+                  label: '可复用模板',
+                  text: '这是我的任务：____\n\n目标：\n____\n\n上下文：\n____\n\n约束：\n____\n\n输出格式：\n____\n\n验收标准：\n____\n\n请先基于当前代码分析，再给出最小改动方案。'
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        title: '迭代循环',
+        body: '更有效的方式不是让 AI 一次做完，而是“人先给初稿或方向，AI 放大优化，人再筛选修正，AI 继续迭代”，并在每轮都看 diff 和验证结果。',
+        guide: {
+          trigger: 'agent-iteration-loop',
+          ariaLabel: '查看 迭代循环 的详细说明',
+          linkLabel: '点击查看详解',
+          modalTitle: '迭代循环：人和 AI 如何多轮收敛',
+          sections: [
+            {
+              title: '什么叫迭代循环',
+              body: '不是一次提问拿最终答案，而是让人和 AI 轮流推进：人定方向，AI 扩展，人做判断，AI 再继续优化。重点不是让 AI 一轮做完，而是让结果在多轮里持续收敛。'
+            },
+            {
+              title: '为什么这样更有效',
+              items: [
+                '人负责方向、边界和判断，不把最终拍板外包给模型。',
+                'AI 负责扩展、补全和发散，降低从 0 到 1 的成本。',
+                '人每轮都可以筛掉不合适的部分，避免错误一路滚大。',
+                '多轮下来，通常比单轮硬做到底更容易收敛到可用结果。'
+              ]
+            },
+            {
+              title: '一个典型循环',
+              items: [
+                '我先给一个初稿 / 想法 / 草案。',
+                'AI 帮我补全、优化、展开。',
+                '我筛掉不合适的部分，补充新约束或新判断。',
+                'AI 基于新版本继续优化。',
+                '重复几轮，直到结果满足目标。'
+              ]
+            },
+            {
+              title: '推荐提问方式',
+              body: '重点是明确告诉 Agent：保留哪些、强化哪些、删掉哪些，再在这个基础上继续下一轮。',
+              prompts: [
+                {
+                  label: '1. 基于初稿优化',
+                  text: '这是我现在的初稿，请先不要推倒重来，在这个基础上优化。'
+                },
+                {
+                  label: '2. 保留主线，局部增强',
+                  text: '保留这些部分不变：____；重点帮我加强：____。'
+                },
+                {
+                  label: '3. 人先筛选，再继续迭代',
+                  text: '我已经筛掉了这些方向，请基于剩下的版本继续优化。'
+                },
+                {
+                  label: '4. 明确下一轮目标',
+                  text: '这是第 2 轮结果，请继续迭代，目标是更清晰 / 更完整 / 更适合落地。'
+                }
+              ]
+            }
+          ]
+        }
+      }
     ]
   },
   {
     id: 'backend',
-    navLabel: '后端',
+    navLabel: '场景分享',
     variant: 'grid',
-    eyebrow: 'BACKEND',
-    title: '天才程序员上线！',
-    summary: '尤其是在读陌生模块、梳理调用链、组织复杂改动方案的时候。',
+    eyebrow: 'SCENARIO SHARING',
+    title: '场景分享：前端、后端、QA 怎么开始用',
+    summary: '共同点不是“AI 替你做完”，而是更快形成第一版判断、方案和清单。',
     cards: [
       {
         title: '调用链理解',
@@ -268,7 +439,7 @@ export const slides = [
         }
       },
       {
-        title: 'CodeReview',
+        title: 'Code Review',
         body: '让 AI 先做一轮结构化审查，帮你更快聚焦高风险改动点。',
         guide: {
           trigger: 'backend-code-review',
@@ -354,42 +525,10 @@ export const slides = [
             '> 先给计划，等我确认后再开始改代码。'
           ].join('\n')
         }
-      }
-    ]
-  },
-  {
-    id: 'qa',
-    navLabel: 'QA',
-    variant: 'grid',
-    eyebrow: 'QA',
-    title: 'QA 和 AI 配合，重点是把验证视角铺开',
-    summary: '它更适合帮你更快展开测试视角、组织验证清单、补全回归路径。',
-    cards: [
-      { title: '测试点枚举', body: '从需求文档快速拉出正常流、异常流、边界流。' },
-      { title: '复现路径整理', body: '根据 bug 描述补全操作步骤、前置条件和影响范围。' },
-      { title: '回归 checklist', body: '把分散的验证点整理成可执行的回归清单。' }
-    ]
-  },
-  {
-    id: 'agent-collab',
-    navLabel: 'Agent协作',
-    variant: 'grid',
-    eyebrow: 'AGENT COLLABORATION',
-    title: '和 Agent 高效协作：三个动作',
-    summary: 'AI是放大器，不是代替者',
-    cards: [
-      {
-        title: '残差连接',
-        body: '先让 Agent 给出当前最优方案，再明确指出“距离理想结果还差什么”。每轮只补一个残差，比整段推倒重来更快。'
       },
-      {
-        title: '结构化输入',
-        body: '把问题拆成：目标、上下文、约束、输出格式、验收标准。输入越像任务合同，输出越稳定。'
-      },
-      {
-        title: '迭代循环',
-        body: '推荐固定 4 步：Analyze -> Plan -> Execute -> Verify。先对齐方案，再执行和回归，能显著降低跑偏与假完成。'
-      }
+      { title: '组件初稿', body: '根据需求描述先给出页面结构、状态拆分和组件边界，再自己收口。' },
+      { title: '代码阅读与重构拆分', body: '快速解释状态流转、样式冲突、接口字段语义，并把大改拆成 reviewable diff。' },
+      { title: '测试点与回归清单', body: '从需求、bug 和接口定义里更快拉出测试点、复现路径和回归 checklist。' }
     ]
   },
   {
@@ -415,7 +554,7 @@ export const slides = [
     title: '刚开始，先把基本动作跑顺更重要',
     summary: '先把最小闭环统一起来，通常会比一开始追求 MCP、多 Agent 更实用。',
     cards: [
-      { title: '一个主工具', body: '先让大家共用一种主路径，比每个人各自摸索更容易沉淀经验。Claude Code / Codex / OpenCode / OpenClaw / IDE插件' },
+      { title: '常用工具', body: '把团队里常用的路径讲清楚：Claude Code / Codex / OpenCode / OpenClaw / IDE 插件。重点不是全都精通，而是先知道自己从哪条路径开始。' },
       { title: '一个工作流', body: '先统一 plan -> diff -> verify，再慢慢加更复杂的自动化。' },
       {
         title: '一个说明文件',
@@ -424,6 +563,26 @@ export const slides = [
           trigger: 'team-starter-readme',
           title: '项目说明文件',
           markdown: [
+            '# AGENTS.md / Project Memory 示例',
+            '',
+            '## 基本动作',
+            '- 启动：`npm install`、`npm run dev`',
+            '- 验证：`npm test`、`npm run build`',
+            '',
+            '## 哪些命令别直接跑',
+            '- 不要直接执行高风险生产命令',
+            '- 不要跳过 diff 和验证就宣称完成',
+            '- 不要在没确认前做大范围删除、重置或覆盖',
+            '',
+            '## 哪些事情必须人工确认',
+            '- 最终验收',
+            '- 高风险操作',
+            '- 涉及敏感信息、数据写入、发布动作的步骤',
+            '',
+            '## 为什么我的 Agent 会更懂我',
+            '- 除了规则，还要给它项目上下文和链路信息',
+            '- 这样它读代码、推断调用关系和收敛方案会更快',
+            '',
             '# Project Memory Index',
             '',
             '- Source root: `/Users/SL_1/workspaces/projects`',
@@ -504,3 +663,25 @@ export const slides = [
     }
   }
 ];
+
+// Keep the presentation flow scenario-first, then explain collaboration methods,
+// and fold the former standalone pitfalls slide into the collaboration section.
+const agentCollabIndex = slides.findIndex((slide) => slide.id === 'agent-collab');
+const pitfallsIndex = slides.findIndex((slide) => slide.id === 'pitfalls');
+
+if (agentCollabIndex !== -1 && pitfallsIndex !== -1) {
+  slides[agentCollabIndex].risks = slides[pitfallsIndex].risks;
+  slides.splice(pitfallsIndex, 1);
+}
+
+const nextAgentCollabIndex = slides.findIndex((slide) => slide.id === 'agent-collab');
+const nextBackendIndex = slides.findIndex((slide) => slide.id === 'backend');
+
+if (
+  nextAgentCollabIndex !== -1 &&
+  nextBackendIndex !== -1 &&
+  nextBackendIndex > nextAgentCollabIndex
+) {
+  const [backendSlide] = slides.splice(nextBackendIndex, 1);
+  slides.splice(nextAgentCollabIndex, 0, backendSlide);
+}

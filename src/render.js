@@ -29,11 +29,11 @@ function renderCards(cards = []) {
               data-backend-guide-trigger="${card.guide.trigger}"
               role="button"
               tabindex="0"
-              aria-label="查看 ${card.title} 的提问示例"
+              aria-label="${card.guide.ariaLabel ?? `查看 ${card.title} 的提问示例`}"
             >
               <h3>${card.title}</h3>
               <p>${card.body}</p>
-              <span class="info-card-link">点击查看提问方式</span>
+              <span class="info-card-link">${card.guide.linkLabel ?? '点击查看提问方式'}</span>
             </article>
           `
     : `
@@ -211,19 +211,20 @@ function findBackendGuides(slides) {
   const guides = [];
 
   for (const slide of slides) {
-    if (slide.id !== 'backend' || !slide.cards?.length) continue;
+    if (!['backend', 'agent-collab'].includes(slide.id) || !slide.cards?.length) continue;
 
     for (const card of slide.cards) {
       if (!card.guide?.trigger) continue;
 
       guides.push({
         trigger: card.guide.trigger,
-        title: card.title,
-        howToAsk: card.guide.howToAsk,
-        example: card.guide.example,
+        title: card.guide.modalTitle ?? card.title,
+        howToAsk: card.guide.howToAsk ?? null,
+        example: card.guide.example ?? null,
         theme: card.guide.theme ?? 'default',
         story: card.guide.story ?? null,
-        alwaysScrollExample: card.guide.alwaysScrollExample ?? false
+        alwaysScrollExample: card.guide.alwaysScrollExample ?? false,
+        sections: card.guide.sections ?? []
       });
     }
   }
@@ -349,6 +350,89 @@ function renderBackendGuideStory(story) {
   `;
 }
 
+function renderGuideDiagram(diagram) {
+  if (!diagram) return '';
+
+  if (diagram.type === 'residual-connection') {
+    const blocks = diagram.blocks ?? [];
+
+    return `
+      <div class="guide-diagram guide-diagram-residual" data-guide-diagram="residual-connection">
+        <div class="guide-diagram-residual-sequence">
+          ${blocks.map((block, index) => `
+            <section class="guide-diagram-residual-block">
+              ${block.title ? `<h5 class="guide-diagram-residual-block-title">${escapeHtml(block.title)}</h5>` : ''}
+              <div class="guide-diagram-residual-block-grid">
+                <span class="guide-diagram-residual-node">${escapeHtml(block.inputLabel ?? '')}</span>
+                <div class="guide-diagram-residual-lanes">
+                  <div class="guide-diagram-residual-lane">
+                    <span class="guide-diagram-residual-lane-label">shortcut / skip</span>
+                    <span class="guide-diagram-residual-layer guide-diagram-residual-layer-accent">${escapeHtml(block.shortcutLabel ?? '')}</span>
+                    <span class="guide-diagram-residual-arrow">-&gt;</span>
+                    <span class="guide-diagram-residual-merge">+</span>
+                  </div>
+                  <div class="guide-diagram-residual-lane">
+                    <span class="guide-diagram-residual-lane-label">residual branch</span>
+                    <span class="guide-diagram-residual-layer">${escapeHtml(block.residualLabel ?? '')}</span>
+                    <span class="guide-diagram-residual-arrow">-&gt;</span>
+                    <span class="guide-diagram-residual-merge">+</span>
+                  </div>
+                </div>
+                <span class="guide-diagram-residual-node">${escapeHtml(block.outputLabel ?? '')}</span>
+              </div>
+            </section>
+            ${index < blocks.length - 1
+    ? `
+              <div class="guide-diagram-residual-step">
+                <span class="guide-diagram-residual-step-label">下一块继续在上一块输出基础上补修正</span>
+              </div>
+            `
+    : ''}
+          `).join('')}
+        </div>
+        <p class="guide-diagram-residual-note">${escapeHtml(diagram.note ?? '')}</p>
+      </div>
+    `;
+  }
+
+  return '';
+}
+
+function renderBackendGuidePrompts(prompts = []) {
+  if (!prompts.length) return '';
+
+  return `
+    <div class="backend-guide-prompts">
+      ${prompts.map((prompt) => `
+        <article class="backend-guide-prompt">
+          <strong class="backend-guide-prompt-label">${escapeHtml(prompt.label ?? '')}</strong>
+          <pre class="backend-guide-prompt-code"><code>${escapeHtml(prompt.text ?? '')}</code></pre>
+        </article>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderBackendGuideSections(sections = []) {
+  if (!sections.length) return '';
+
+  return sections.map((section) => `
+    <section class="backend-guide-block">
+      <h4>${escapeHtml(section.title)}</h4>
+      ${section.body ? `<p>${escapeHtml(section.body)}</p>` : ''}
+      ${renderGuideDiagram(section.diagram)}
+      ${renderBackendGuidePrompts(section.prompts)}
+      ${section.items?.length
+    ? `
+          <ul class="backend-guide-list">
+            ${section.items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}
+          </ul>
+        `
+    : ''}
+    </section>
+  `).join('');
+}
+
 function renderBackendGuideModals(slides) {
   const guides = findBackendGuides(slides);
   if (!guides.length) return '';
@@ -357,6 +441,19 @@ function renderBackendGuideModals(slides) {
     const exampleClasses = ['backend-guide-example'];
     if (guide.theme === 'codex-cli') exampleClasses.push('backend-guide-example-codex');
     if (guide.alwaysScrollExample) exampleClasses.push('backend-guide-example-scroll');
+    const body = guide.sections.length
+      ? renderBackendGuideSections(guide.sections)
+      : `
+          <section class="backend-guide-block">
+            <h4>怎么提问</h4>
+            <p>${guide.howToAsk}</p>
+          </section>
+          <section class="backend-guide-block">
+            <h4>提问例子</h4>
+            ${guide.theme === 'codex-cli' ? '<span class="backend-guide-cli-label">Codex CLI Transcript</span>' : ''}
+            <pre class="${exampleClasses.join(' ')}"><code>${escapeHtml(guide.example)}</code></pre>
+          </section>
+        `;
 
     return `
     <div class="backend-guide-modal" data-backend-guide-modal="${guide.trigger}" aria-hidden="true">
@@ -369,15 +466,7 @@ function renderBackendGuideModals(slides) {
         </header>
         <div class="backend-guide-content">
           ${renderBackendGuideStory(guide.story)}
-          <section class="backend-guide-block">
-            <h4>怎么提问</h4>
-            <p>${guide.howToAsk}</p>
-          </section>
-          <section class="backend-guide-block">
-            <h4>提问例子</h4>
-            ${guide.theme === 'codex-cli' ? '<span class="backend-guide-cli-label">Codex CLI Transcript</span>' : ''}
-            <pre class="${exampleClasses.join(' ')}"><code>${escapeHtml(guide.example)}</code></pre>
-          </section>
+          ${body}
         </div>
       </section>
     </div>
